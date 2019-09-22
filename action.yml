@@ -1,0 +1,37 @@
+name: Build and push docker images (with cache)
+description: Use registry to pull/push cache for an image (stages included)
+author: whoan
+
+inputs:
+
+  docker_username:
+    description: Docker's registry user
+    required: true
+  docker_password:
+    description: Docker's registry password
+    required: true
+  docker_registry:
+    description: "(Optional) Docker registry (default: Docker Hub's registry)"
+    required: false
+
+  image_name:
+    description: Name of the image to build
+    required: true
+  image_tag:
+    description: Tag of the image to build
+    required: true
+  context:
+    description: "(Optional) Docker context (default: ./)"
+    required: false
+    default: .
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    PULL_STAGES_LOG: pull-stages-output.log
+    BUILD_LOG: build-output.log
+
+branding:
+  icon: 'anchor'
+  color: 'blue'
