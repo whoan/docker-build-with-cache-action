@@ -61,7 +61,7 @@ push_image_and_stages() {
   docker push ${INPUT_IMAGE_NAME}:${INPUT_IMAGE_TAG}
 
   # push each building stage
-  stage_number=0
+  stage_number=1
   for stage in $(_get_stages); do
     stage_image=${INPUT_IMAGE_NAME}-stages:$stage_number
     docker tag $stage $stage_image
