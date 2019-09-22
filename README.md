@@ -29,6 +29,12 @@ Docker registry (**default: Docker Hub's registry**).
 
 Docker context (**default: ./**).
 
+### `push_image_and_stages`
+
+Set to `false` to avoid pushing to registry (**default: true**).
+
+You might want to set this option to `false` if you plan to use this action for PRs to avoid overriding cached stages in the registry.
+
 ## Outputs
 
 None

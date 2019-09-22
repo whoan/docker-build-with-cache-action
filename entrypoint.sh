@@ -83,5 +83,9 @@ check_required_input
 login_to_registry
 pull_cached_stages
 build_image
-push_image_and_stages
+
+if [ "$INPUT_PUSH_IMAGE_AND_STAGES" = true ]; then
+  push_image_and_stages
+fi
+
 logout_from_registry
