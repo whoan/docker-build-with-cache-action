@@ -1,6 +1,8 @@
 # Docker build-with-cache action
 
-This action builds your docker image, caching the stages to improve building times in subsequent builds.
+This action builds your docker image and cache the stages to improve building times in subsequent builds.
+
+By default it pushes the image with all the stages to a registry, but you can disable this feature setting `push_image_and_stages` to `false`.
 
 ## Inputs
 

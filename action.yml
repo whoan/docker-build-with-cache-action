@@ -1,4 +1,4 @@
-name: Build and push docker images (with cache)
+name: Build docker images using cache
 description: Use registry to pull/push cache for an image (stages included)
 author: whoan
 
