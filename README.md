@@ -1,6 +1,6 @@
 # Docker build-with-cache action
 
-This action builds your docker image and cache the stages to improve building times in subsequent builds.
+This action builds your docker image and cache the stages (supports multi-stage builds) to improve building times in subsequent builds.
 
 By default it pushes the image with all the stages to a registry, but you can disable this feature setting `push_image_and_stages` to `false`.
 
@@ -42,15 +42,16 @@ Minimal example:
     image_name: whoan/node
 ```
 
-You can see a full **[working example in this repo](https://github.com/whoan/docker-images/blob/master/.github/workflows/node-alpine-slim.yml)**:
+You can see a full **[working example in this repo](https://github.com/whoan/docker-images/blob/master/.github/workflows/node-alpine-slim.yml)** using GitHub's registry:
 
 ```yml
 - uses: whoan/docker-build-with-cache-action@v1
   with:
     username: "${{ secrets.DOCKER_USERNAME }}"
     password: "${{ secrets.DOCKER_PASSWORD }}"
-    image_name: whoan/node
+    image_name: whoan/docker-images/node
     image_tag: alpine-slim
+    registry: docker.pkg.github.com
     context: node-alpine-slim
 ```
 
