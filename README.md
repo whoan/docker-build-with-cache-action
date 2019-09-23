@@ -4,36 +4,23 @@ This action builds your docker image, caching the stages to improve building tim
 
 ## Inputs
 
-### `username`
+### Required
 
-**Required** Docker registry's user.
+`username`: Docker registry's user.
 
-### `password`
+`password`: Docker registry's password.
 
-**Required** Docker registry's password.
+`image_name`: Image name with namespace (eg: *whoan/node*).
 
-### `registry`
+### Optional
 
-Docker registry (**default: Docker Hub's registry**).
+`registry`: Docker registry (**default: Docker Hub's registry**).
 
+`image_tag`: Tag of the image to build (**default: latest**).
 
-### `image_name`
+`context`: Docker context (**default: ./**).
 
-**Required** Docker's registry user.
-
-### `image_tag`
-
-Tag of the image to build (**default: latest**).
-
-### `context`
-
-Docker context (**default: ./**).
-
-### `push_image_and_stages`
-
-Set to `false` to avoid pushing to registry (**default: true**).
-
-You might want to set this option to `false` if you plan to use this action for PRs to avoid overriding cached stages in the registry.
+`push_image_and_stages`: Set to `false` to avoid pushing to registry (**default: true**). You might want to set this option to `false` if you plan to use this action for PRs to avoid overriding cached stages in the registry.
 
 ## Outputs
 
