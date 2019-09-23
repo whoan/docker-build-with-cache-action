@@ -40,7 +40,7 @@ login_to_registry() {
 }
 
 pull_cached_stages() {
-  docker pull --all-tags $(_get_full_image_name)-stages 2> /dev/null | tee "$PULL_STAGES_LOG" || true
+  docker pull --all-tags "$(_get_full_image_name)"-stages 2> /dev/null | tee "$PULL_STAGES_LOG" || true
 }
 
 build_image() {
@@ -55,13 +55,13 @@ build_image() {
   # build image using cache
   docker build \
     $cache_from \
-    --tag $(_get_full_image_name):${INPUT_IMAGE_TAG} \
+    --tag "$(_get_full_image_name)":${INPUT_IMAGE_TAG} \
     ${INPUT_CONTEXT} | tee "$BUILD_LOG"
 }
 
 push_image_and_stages() {
   # push image
-  docker push $(_get_full_image_name):${INPUT_IMAGE_TAG}
+  docker push "$(_get_full_image_name)":${INPUT_IMAGE_TAG}
 
   # push each building stage
   stage_number=1
@@ -74,7 +74,7 @@ push_image_and_stages() {
 
   # push the image itself as a stage (the last one)
   stage_image=$(_get_full_image_name)-stages:$stage_number
-  docker tag $(_get_full_image_name):${INPUT_IMAGE_TAG} $stage_image
+  docker tag "$(_get_full_image_name)":${INPUT_IMAGE_TAG} $stage_image
   docker push $stage_image
 }
 
