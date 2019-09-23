@@ -40,7 +40,7 @@ login_to_registry() {
 }
 
 pull_cached_stages() {
-  docker pull --all-tags $(_get_full_image_name)-stages | tee "$PULL_STAGES_LOG" || true
+  docker pull --all-tags $(_get_full_image_name)-stages 2> /dev/null | tee "$PULL_STAGES_LOG" || true
 }
 
 build_image() {
