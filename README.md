@@ -30,7 +30,17 @@ None
 
 ## Example usage
 
-You can see a **[working example in this repo](https://github.com/whoan/docker-images/blob/master/.github/workflows/node-alpine-slim.yml)**:
+Minimal example:
+
+```yml
+- uses: whoan/docker-build-with-cache-action@v1
+  with:
+    username: whoan
+    password: "${{ secrets.DOCKER_PASSWORD }}"
+    image_name: whoan/node
+```
+
+You can see a full **[working example in this repo](https://github.com/whoan/docker-images/blob/master/.github/workflows/node-alpine-slim.yml)**:
 
 ```yml
 - uses: whoan/docker-build-with-cache-action@v1
