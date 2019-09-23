@@ -25,14 +25,14 @@ _get_stages() {
 
 # action steps
 check_required_input() {
-  _exit_if_empty DOCKER_USERNAME "${INPUT_DOCKER_USERNAME}"
-  _exit_if_empty DOCKER_PASSWORD "${INPUT_DOCKER_PASSWORD}"
+  _exit_if_empty USERNAME "${INPUT_USERNAME}"
+  _exit_if_empty PASSWORD "${INPUT_PASSWORD}"
   _exit_if_empty IMAGE_NAME "${INPUT_IMAGE_NAME}"
   _exit_if_empty IMAGE_TAG "${INPUT_IMAGE_TAG}"
 }
 
 login_to_registry() {
-  echo ${INPUT_DOCKER_PASSWORD} | docker login -u ${INPUT_DOCKER_USERNAME} --password-stdin ${INPUT_DOCKER_REGISTRY}
+  echo ${INPUT_PASSWORD} | docker login -u ${INPUT_USERNAME} --password-stdin ${INPUT_REGISTRY}
 }
 
 pull_cached_stages() {

@@ -1,18 +1,18 @@
-# Docker Build-with-cache action
+# Docker build-with-cache action
 
 This action builds your docker image, caching the stages to improve building times in subsequent builds.
 
 ## Inputs
 
-### `docker_username`
+### `username`
 
-**Required** Docker's registry user.
+**Required** Docker registry's user.
 
-### `docker_password`
+### `password`
 
-**Required** Docker's registry password.
+**Required** Docker registry's password.
 
-### `docker_registry`
+### `registry`
 
 Docker registry (**default: Docker Hub's registry**).
 

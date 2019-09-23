@@ -4,13 +4,13 @@ author: whoan
 
 inputs:
 
-  docker_username:
+  username:
     description: Docker's registry user
     required: true
-  docker_password:
+  password:
     description: Docker's registry password
     required: true
-  docker_registry:
+  registry:
     description: "(Optional) Docker registry (default: Docker Hub's registry)"
     required: false
 
