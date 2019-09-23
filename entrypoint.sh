@@ -23,6 +23,10 @@ _get_stages() {
   sed -rn 's/ *-*> (.+)/\1/p'
 }
 
+_get_full_image_name() {
+  echo ${INPUT_REGISTRY:+$INPUT_REGISTRY/}${INPUT_IMAGE_NAME}
+}
+
 # action steps
 check_required_input() {
   _exit_if_empty USERNAME "${INPUT_USERNAME}"
@@ -36,7 +40,7 @@ login_to_registry() {
 }
 
 pull_cached_stages() {
-  docker pull --all-tags ${INPUT_IMAGE_NAME}-stages | tee "$PULL_STAGES_LOG" || true
+  docker pull --all-tags $(_get_full_image_name)-stages | tee "$PULL_STAGES_LOG" || true
 }
 
 build_image() {
@@ -44,34 +48,33 @@ build_image() {
 
   # create param to use (multiple) --cache-from options
   if [ "$max_stage" ]; then
-    echo "max stage: $max_stage"
-    cache_from=$(eval "echo --cache-from=${INPUT_IMAGE_NAME}-stages:{1..$max_stage}")
+    cache_from=$(eval "echo --cache-from=$(_get_full_image_name)-stages:{1..$max_stage}")
     echo "Use cache: $cache_from"
   fi
 
   # build image using cache
   docker build \
     $cache_from \
-    --tag ${INPUT_IMAGE_NAME}:${INPUT_IMAGE_TAG} \
+    --tag $(_get_full_image_name):${INPUT_IMAGE_TAG} \
     ${INPUT_CONTEXT} | tee "$BUILD_LOG"
 }
 
 push_image_and_stages() {
   # push image
-  docker push ${INPUT_IMAGE_NAME}:${INPUT_IMAGE_TAG}
+  docker push $(_get_full_image_name):${INPUT_IMAGE_TAG}
 
   # push each building stage
   stage_number=1
   for stage in $(_get_stages); do
-    stage_image=${INPUT_IMAGE_NAME}-stages:$stage_number
+    stage_image=$(_get_full_image_name)-stages:$stage_number
     docker tag $stage $stage_image
     docker push $stage_image
     stage_number=$(( stage_number+1 ))
   done
 
   # push the image itself as a stage (the last one)
-  stage_image=${INPUT_IMAGE_NAME}-stages:$stage_number
-  docker tag ${INPUT_IMAGE_NAME}:${INPUT_IMAGE_TAG} $stage_image
+  stage_image=$(_get_full_image_name)-stages:$stage_number
+  docker tag $(_get_full_image_name):${INPUT_IMAGE_TAG} $stage_image
   docker push $stage_image
 }
 
