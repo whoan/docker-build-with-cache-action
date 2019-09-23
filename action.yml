@@ -18,8 +18,9 @@ inputs:
     description: Name of the image to build
     required: true
   image_tag:
-    description: Tag of the image to build
-    required: true
+    description: "(Optional) Tag of the image to build (default: latest)"
+    required: false
+    default: latest
   context:
     description: "(Optional) Docker context (default: ./)"
     required: false

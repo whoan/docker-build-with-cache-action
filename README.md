@@ -23,7 +23,7 @@ Docker registry (**default: Docker Hub's registry**).
 
 ### `image_tag`
 
-**Required** Tag of the image to build.
+Tag of the image to build (**default: latest**).
 
 ### `context`
 
@@ -42,10 +42,9 @@ None
 ## Example usage
 
 ```yml
-  - uses: ./.github/actions/build-and-push-with-cache
+  - uses: whoan/docker-build-with-cache-action@master
     with:
       docker_username: "${{ secrets.DOCKER_USERNAME }}"
       docker_password: "${{ secrets.DOCKER_PASSWORD }}"
       image_name: ${{ github.actor }}/node
-      image_tag: alpine-slim
 ```
