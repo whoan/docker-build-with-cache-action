@@ -20,6 +20,8 @@ This action builds your docker image, caching the stages to improve building tim
 
 `context`: Docker context (**default: ./**).
 
+`dockerfile`: Name of the Dockerfile (**default: Dockerfile**)
+
 `push_image_and_stages`: Set to `false` to avoid pushing to registry (**default: true**). You might want to set this option to `false` if you plan to use this action for PRs to avoid overriding cached stages in the registry.
 
 ## Outputs
@@ -51,5 +53,6 @@ Another example for **Google Cloud Platform** and more custom settings:
     image_name: your_id/your_image
     image_tag: latest
     context: sub_folder_in_your_repo
+    dockerfile: custom.dockerfile
     push_image_and_stages: false  # useful when you are setting a workflow to run on PRs
 ```
