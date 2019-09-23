@@ -42,7 +42,7 @@ None
 ## Example usage
 
 ```yml
-  - uses: whoan/docker-build-with-cache-action@master
+  - uses: whoan/docker-build-with-cache-action@v1
     with:
       docker_username: "${{ secrets.DOCKER_USERNAME }}"
       docker_password: "${{ secrets.DOCKER_PASSWORD }}"
