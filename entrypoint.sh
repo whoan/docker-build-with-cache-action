@@ -36,7 +36,7 @@ check_required_input() {
 }
 
 login_to_registry() {
-  echo ${INPUT_PASSWORD} | docker login -u ${INPUT_USERNAME} --password-stdin ${INPUT_REGISTRY}
+  echo "${INPUT_PASSWORD}" | docker login -u "${INPUT_USERNAME}" --password-stdin "${INPUT_REGISTRY}"
 }
 
 pull_cached_stages() {
@@ -68,8 +68,8 @@ push_image_and_stages() {
   stage_number=1
   for stage in $(_get_stages); do
     stage_image=$(_get_full_image_name)-stages:$stage_number
-    docker tag $stage $stage_image
-    docker push $stage_image
+    docker tag "$stage" "$stage_image"
+    docker push "$stage_image"
     stage_number=$(( stage_number+1 ))
   done
 
