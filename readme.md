@@ -69,3 +69,7 @@ Another example for **Google Cloud Platform** and more custom settings:
     dockerfile: custom.dockerfile
     push_image_and_stages: false  # useful when you are setting a workflow to run on PRs
 ```
+
+## License
+
+[MIT](https://github.com/whoan/docker-build-with-cache-action/blob/master/LICENSE)
