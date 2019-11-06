@@ -14,13 +14,13 @@ _exit_if_empty() {
 
 _get_max_stage_number() {
   sed -nr 's/^([0-9]+): Pulling from.+/\1/p' "$PULL_STAGES_LOG" |
-  sort -n |
-  tail -n 1
+    sort -n |
+    tail -n 1
 }
 
 _get_stages() {
   grep -EB1 '^Step [0-9]+/[0-9]+ : FROM' "$BUILD_LOG" |
-  sed -rn 's/ *-*> (.+)/\1/p'
+    sed -rn 's/ *-*> (.+)/\1/p'
 }
 
 _get_full_image_name() {
