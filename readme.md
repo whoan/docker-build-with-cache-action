@@ -30,6 +30,16 @@ By default it pushes the image with all the stages to a registry, but you can di
 
 None
 
+## How it works
+
+The action does the following every time it is triggered:
+
+- Pull previously pushed [stages](https://docs.docker.com/develop/develop-images/multistage-build/) (if any) from the specified `registry` (default: https://hub.docker.com)
+- Build the image using cache (ie: using the pulled stages)
+- Push each stage of the built image to the registry with the name `<image_name>-stages:<1,2,3,...>`
+- Push the image itself like `<image_name>:<image_tag>`
+- Push any git tag if available like `<image_name>:<git_tag>`
+
 ## Example usage
 
 Minimal example:
