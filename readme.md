@@ -65,6 +65,8 @@ You can see a full **[working example in this repo](https://github.com/whoan/doc
     context: node-alpine-slim
 ```
 
+> More info [here](https://help.github.com/en/github/managing-packages-with-github-packages/configuring-docker-for-use-with-github-packages#authenticating-to-github-packages) on how to get usernae/password for GitHub's registry.
+
 Another example for **Google Cloud Platform** and more custom settings:
 
 ```yml
