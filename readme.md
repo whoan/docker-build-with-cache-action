@@ -80,6 +80,12 @@ Another example for **Google Cloud Platform** and more custom settings:
     push_image_and_stages: false  # useful when you are setting a workflow to run on PRs
 ```
 
+## Cache is not working?
+
+Be aware of the conditions that can invalidate your cache:
+
+- Be specific with the base images. If you start from an image with `latest` tag, it may download different versions when the action is triggered, and it will invalidate the cache.
+
 ## License
 
 [MIT](https://github.com/whoan/docker-build-with-cache-action/blob/master/LICENSE)
