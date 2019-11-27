@@ -52,10 +52,18 @@ build_image() {
     echo "Use cache: $cache_from"
   fi
 
+  echo docker build \
+    $cache_from \
+    --tag "$(_get_full_image_name)":${INPUT_IMAGE_TAG} \
+    ${INPUT_BUILD_ARGS} \
+    --file ${INPUT_CONTEXT}/${INPUT_DOCKERFILE} \
+    ${INPUT_CONTEXT} | tee "$BUILD_LOG"
+
   # build image using cache
   docker build \
     $cache_from \
     --tag "$(_get_full_image_name)":${INPUT_IMAGE_TAG} \
+    ${INPUT_BUILD_ARGS} \
     --file ${INPUT_CONTEXT}/${INPUT_DOCKERFILE} \
     ${INPUT_CONTEXT} | tee "$BUILD_LOG"
 }

@@ -13,6 +13,9 @@ inputs:
   registry:
     description: "(Optional) Docker registry (default: Docker Hub's registry)"
     required: false
+  build_args:
+    description: "(Optional) Extra arguments to pass to docker build"
+    required: false
 
   image_name:
     description: Name of the image to build
