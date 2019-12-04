@@ -90,7 +90,7 @@ push_image_and_stages() {
 }
 
 logout_from_registry() {
-  docker logout
+  docker logout "${INPUT_REGISTRY}"
 }
 
 check_required_input
