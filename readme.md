@@ -26,7 +26,7 @@ By default it pushes the image with all the stages to a registry, but you can di
 
 `push_image_and_stages`: Set to `false` to avoid pushing to registry (**default: true**). You might want to set this option to `false` if you plan to use this action for PRs to avoid overriding cached stages in the registry.
 
-`build_extra_args`: Provide extra arguments to `docker build`. eg: `build_extra_args: "--compress=true --build-arg=hello=world"`
+`build_extra_args`: Provide extra arguments to `docker build`. eg: `"--compress=true --build-arg=hello=world"`
 
 ## Outputs
 
