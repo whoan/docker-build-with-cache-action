@@ -65,6 +65,7 @@ You can see a full **[working example in this repo](https://github.com/whoan/doc
     image_tag: alpine-slim
     registry: docker.pkg.github.com
     context: node-alpine-slim
+    build_extra_args: "--compress=true --build-arg=hello=world"
 ```
 
 > More info [here](https://help.github.com/en/github/managing-packages-with-github-packages/configuring-docker-for-use-with-github-packages#authenticating-to-github-packages) on how to get username/password for GitHub's registry.
