@@ -47,7 +47,7 @@ The action does the following every time it is triggered:
 Minimal example:
 
 ```yml
-- uses: whoan/docker-build-with-cache-action@v2
+- uses: whoan/docker-build-with-cache-action@v3
   with:
     username: whoan
     password: "${{ secrets.DOCKER_PASSWORD }}"
@@ -57,7 +57,7 @@ Minimal example:
 You can see a full **[working example in this repo](https://github.com/whoan/docker-images/blob/master/.github/workflows/node-alpine-slim.yml)** using GitHub's registry:
 
 ```yml
-- uses: whoan/docker-build-with-cache-action@v2
+- uses: whoan/docker-build-with-cache-action@v3
   with:
     username: "${{ secrets.DOCKER_USERNAME }}"
     password: "${{ secrets.DOCKER_PASSWORD }}"
@@ -73,7 +73,7 @@ You can see a full **[working example in this repo](https://github.com/whoan/doc
 Another example for **Google Cloud Platform** and more custom settings:
 
 ```yml
-- uses: whoan/docker-build-with-cache-action@v2
+- uses: whoan/docker-build-with-cache-action@v3
   with:
     username: _json_key
     password: "${{ secrets.DOCKER_PASSWORD }}"
