@@ -33,6 +33,10 @@ inputs:
     description: "(Optional) Set to false to avoid pushing to registry (default: true)"
     required: false
     default: true
+  pull_image_and_stages:
+    description: "(Optional) Set to false to avoid pulling from registry (default: true)"
+    required: false
+    default: true
   build_extra_args:
     description: "(Optional) Extra arguments to pass to docker build"
     required: false

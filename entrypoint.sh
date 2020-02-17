@@ -98,7 +98,11 @@ logout_from_registry() {
 
 check_required_input
 login_to_registry
-pull_cached_stages
+
+if [ "$INPUT_PULL_IMAGE_AND_STAGES" = true ]; then
+  pull_cached_stages
+fi
+
 build_image
 
 if [ "$INPUT_PUSH_IMAGE_AND_STAGES" = true ]; then
