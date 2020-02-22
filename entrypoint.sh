@@ -3,12 +3,12 @@
 set -e
 
 # helper functions
-_exit_if_empty() {
+_has_value() {
   local var_name=${1}
   local var_value=${2}
   if [ -z "$var_value" ]; then
-    echo "Missing input $var_name" >&2
-    exit 1
+    echo "Missing value $var_name" >&2
+    return 1
   fi
 }
 
@@ -27,19 +27,39 @@ _get_full_image_name() {
   echo ${INPUT_REGISTRY:+$INPUT_REGISTRY/}${INPUT_IMAGE_NAME}
 }
 
+_push_git_tag() {
+  [[ "$GITHUB_REF" =~ /tags/ ]] || return 0
+  local git_tag=${GITHUB_REF##*/tags/}
+  local image_with_git_tag
+  image_with_git_tag="$(_get_full_image_name)":$git_tag
+  docker tag "$(_get_full_image_name)":${INPUT_IMAGE_TAG} "$image_with_git_tag"
+  docker push "$image_with_git_tag"
+}
+
+
 # action steps
 check_required_input() {
-  _exit_if_empty USERNAME "${INPUT_USERNAME}"
-  _exit_if_empty PASSWORD "${INPUT_PASSWORD}"
-  _exit_if_empty IMAGE_NAME "${INPUT_IMAGE_NAME}"
-  _exit_if_empty IMAGE_TAG "${INPUT_IMAGE_TAG}"
+  _has_value IMAGE_NAME "${INPUT_IMAGE_NAME}" \
+    && _has_value IMAGE_TAG "${INPUT_IMAGE_TAG}" \
+    && return
+  exit 1
 }
 
 login_to_registry() {
-  echo "${INPUT_PASSWORD}" | docker login -u "${INPUT_USERNAME}" --password-stdin "${INPUT_REGISTRY}"
+  _has_value USERNAME "${INPUT_USERNAME}" \
+    && _has_value PASSWORD "${INPUT_PASSWORD}" \
+    && echo "${INPUT_PASSWORD}" | docker login -u "${INPUT_USERNAME}" --password-stdin "${INPUT_REGISTRY}" \
+    && return 0
+
+  not_logged_in=true
+  echo "INFO: Not logged in to registry - Won't be able to pull from private repos, nor to push to public/private repos" >&2
+  return 1
 }
 
 pull_cached_stages() {
+  if [ "$INPUT_PULL_IMAGE_AND_STAGES" != true ]; then
+    return
+  fi
   docker pull --all-tags "$(_get_full_image_name)"-stages 2> /dev/null | tee "$PULL_STAGES_LOG" || true
 }
 
@@ -63,19 +83,19 @@ build_image() {
   set +x
 }
 
-push_git_tag() {
-  [[ "$GITHUB_REF" =~ /tags/ ]] || return 0
-  local git_tag=${GITHUB_REF##*/tags/}
-  local image_with_git_tag
-  image_with_git_tag="$(_get_full_image_name)":$git_tag
-  docker tag "$(_get_full_image_name)":${INPUT_IMAGE_TAG} "$image_with_git_tag"
-  docker push "$image_with_git_tag"
-}
-
 push_image_and_stages() {
+  if [ "$INPUT_PUSH_IMAGE_AND_STAGES" != true ]; then
+    return
+  fi
+
+  if [ "$not_logged_in" ]; then
+    echo "Can't push when not logged in to registry" >&2
+    return 1
+  fi
+
   # push image
   docker push "$(_get_full_image_name)":${INPUT_IMAGE_TAG}
-  push_git_tag
+  _push_git_tag
 
   # push each building stage
   stage_number=1
@@ -93,20 +113,17 @@ push_image_and_stages() {
 }
 
 logout_from_registry() {
+  if [ "$not_logged_in" ]; then
+    return
+  fi
   docker logout "${INPUT_REGISTRY}"
 }
 
+
+# run the action
 check_required_input
 login_to_registry
-
-if [ "$INPUT_PULL_IMAGE_AND_STAGES" = true ]; then
-  pull_cached_stages
-fi
-
+pull_cached_stages
 build_image
-
-if [ "$INPUT_PUSH_IMAGE_AND_STAGES" = true ]; then
-  push_image_and_stages
-fi
-
+push_image_and_stages
 logout_from_registry
