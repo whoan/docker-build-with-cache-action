@@ -7,7 +7,7 @@ _has_value() {
   local var_name=${1}
   local var_value=${2}
   if [ -z "$var_value" ]; then
-    echo "Missing value $var_name" >&2
+    echo "INFO: Missing value $var_name" >&2
     return 1
   fi
 }
@@ -39,6 +39,7 @@ _push_git_tag() {
 
 # action steps
 check_required_input() {
+  echo "[Action Step] Checking required input..."
   _has_value IMAGE_NAME "${INPUT_IMAGE_NAME}" \
     && _has_value IMAGE_TAG "${INPUT_IMAGE_TAG}" \
     && return
@@ -46,24 +47,28 @@ check_required_input() {
 }
 
 login_to_registry() {
-  _has_value USERNAME "${INPUT_USERNAME}" \
-    && _has_value PASSWORD "${INPUT_PASSWORD}" \
-    && echo "${INPUT_PASSWORD}" | docker login -u "${INPUT_USERNAME}" --password-stdin "${INPUT_REGISTRY}" \
-    && return 0
+  if _has_value USERNAME "${INPUT_USERNAME}" && _has_value PASSWORD "${INPUT_PASSWORD}"; then
+    echo "${INPUT_PASSWORD}" | docker login -u "${INPUT_USERNAME}" --password-stdin "${INPUT_REGISTRY}" \
+      && return 0
+    local log="Could not log in (please check credentials)"
+  else
+    local log="No credentials provided"
+  fi
 
   not_logged_in=true
-  echo "INFO: Not logged in to registry - Won't be able to pull from private repos, nor to push to public/private repos" >&2
-  return 1
+  echo "INFO: $log - Won't be able to pull from private repos, nor to push to public/private repos" >&2
 }
 
 pull_cached_stages() {
   if [ "$INPUT_PULL_IMAGE_AND_STAGES" != true ]; then
     return
   fi
+  echo "[Action Step] Pulling image..."
   docker pull --all-tags "$(_get_full_image_name)"-stages 2> /dev/null | tee "$PULL_STAGES_LOG" || true
 }
 
 build_image() {
+  echo "[Action Step] Building image..."
   max_stage=$(_get_max_stage_number)
 
   # create param to use (multiple) --cache-from options
@@ -89,10 +94,11 @@ push_image_and_stages() {
   fi
 
   if [ "$not_logged_in" ]; then
-    echo "Can't push when not logged in to registry" >&2
-    return 1
+    echo "WARNING: Can't push when not logged in to registry" >&2
+    return
   fi
 
+  echo "[Action Step] Pushing image..."
   # push image
   docker push "$(_get_full_image_name)":${INPUT_IMAGE_TAG}
   _push_git_tag
