@@ -29,7 +29,9 @@ _get_full_image_name() {
 
 _push_git_tag() {
   [[ "$GITHUB_REF" =~ /tags/ ]] || return 0
+
   local git_tag=${GITHUB_REF##*/tags/}
+  echo -e "\nPushing git tag: $git_tag"
   local image_with_git_tag
   image_with_git_tag="$(_get_full_image_name)":$git_tag
   docker tag "$(_get_full_image_name)":${INPUT_IMAGE_TAG} "$image_with_git_tag"
@@ -39,7 +41,7 @@ _push_git_tag() {
 
 # action steps
 check_required_input() {
-  echo "[Action Step] Checking required input..."
+  echo -e "\n[Action Step] Checking required input..."
   _has_value IMAGE_NAME "${INPUT_IMAGE_NAME}" \
     && _has_value IMAGE_TAG "${INPUT_IMAGE_TAG}" \
     && return
@@ -47,6 +49,7 @@ check_required_input() {
 }
 
 login_to_registry() {
+  echo -e "\n[Action Step] Log in to registry..."
   if _has_value USERNAME "${INPUT_USERNAME}" && _has_value PASSWORD "${INPUT_PASSWORD}"; then
     echo "${INPUT_PASSWORD}" | docker login -u "${INPUT_USERNAME}" --password-stdin "${INPUT_REGISTRY}" \
       && return 0
@@ -63,12 +66,12 @@ pull_cached_stages() {
   if [ "$INPUT_PULL_IMAGE_AND_STAGES" != true ]; then
     return
   fi
-  echo "[Action Step] Pulling image..."
+  echo -e "\n[Action Step] Pulling image..."
   docker pull --all-tags "$(_get_full_image_name)"-stages 2> /dev/null | tee "$PULL_STAGES_LOG" || true
 }
 
 build_image() {
-  echo "[Action Step] Building image..."
+  echo -e "\n[Action Step] Building image..."
   max_stage=$(_get_max_stage_number)
 
   # create param to use (multiple) --cache-from options
@@ -98,8 +101,9 @@ push_image_and_stages() {
     return
   fi
 
-  echo "[Action Step] Pushing image..."
+  echo -e "\n[Action Step] Pushing image..."
   # push image
+  echo "Pushing tag: ${INPUT_IMAGE_TAG}"
   docker push "$(_get_full_image_name)":${INPUT_IMAGE_TAG}
   if [ "$INPUT_PUSH_GIT_TAG" = true ]; then
     _push_git_tag
@@ -108,6 +112,7 @@ push_image_and_stages() {
   # push each building stage
   stage_number=1
   for stage in $(_get_stages); do
+    echo -e "\nPushing stage: $stage_number"
     stage_image=$(_get_full_image_name)-stages:$stage_number
     docker tag "$stage" "$stage_image"
     docker push "$stage_image"
@@ -115,6 +120,7 @@ push_image_and_stages() {
   done
 
   # push the image itself as a stage (the last one)
+  echo -e "\nPushing stage: $stage_number"
   stage_image=$(_get_full_image_name)-stages:$stage_number
   docker tag "$(_get_full_image_name)":${INPUT_IMAGE_TAG} $stage_image
   docker push $stage_image
@@ -124,6 +130,7 @@ logout_from_registry() {
   if [ "$not_logged_in" ]; then
     return
   fi
+  echo -e "\n[Action Step] Log out from registry..."
   docker logout "${INPUT_REGISTRY}"
 }
 
