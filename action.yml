@@ -4,18 +4,18 @@ author: whoan
 
 inputs:
 
+  image_name:
+    description: Name of the image to build
+    required: true
   username:
-    description: Docker's registry user (used to push image to repository, or to pull from private repository)
+    description: (Optional) Docker's registry user (needed to push image to repository, or to pull from private repository)
     required: false
   password:
-    description: Docker's registry password (used to push image to repository, or to pull from private repository)
+    description: (Optional) Docker's registry password (needed to push image to repository, or to pull from private repository)
     required: false
   registry:
     description: "(Optional) Docker registry (default: Docker Hub's registry)"
     required: false
-  image_name:
-    description: Name of the image to build
-    required: true
   image_tag:
     description: "(Optional) Tag of the image to build (default: latest)"
     required: false
