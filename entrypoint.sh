@@ -101,7 +101,9 @@ push_image_and_stages() {
   echo "[Action Step] Pushing image..."
   # push image
   docker push "$(_get_full_image_name)":${INPUT_IMAGE_TAG}
-  _push_git_tag
+  if [ "$INPUT_PUSH_GIT_TAG" = true ]; then
+    _push_git_tag
+  fi
 
   # push each building stage
   stage_number=1
