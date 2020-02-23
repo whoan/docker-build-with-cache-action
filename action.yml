@@ -5,15 +5,14 @@ author: whoan
 inputs:
 
   username:
-    description: Docker's registry user
-    required: true
+    description: Docker's registry user (used to push image to repository, or to pull from private repository)
+    required: false
   password:
-    description: Docker's registry password
-    required: true
+    description: Docker's registry password (used to push image to repository, or to pull from private repository)
+    required: false
   registry:
     description: "(Optional) Docker registry (default: Docker Hub's registry)"
     required: false
-
   image_name:
     description: Name of the image to build
     required: true
