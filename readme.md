@@ -26,11 +26,13 @@ By default it pushes the image with all the stages to a registry (needs username
 
 `push_image_and_stages`: Set to `false` to avoid pushing to registry (**default: true**). You might want to set this option to `false` if you plan to use this action for PRs to avoid overriding cached stages in the registry.
 
-`push_git_tag`: In addition to `image_tag` value, you can also push current git tag (**default: false**)
+`push_git_tag`: In addition to `image_tag`, you can also push the git tag in your [branch tip][branch tip] (**default: false**)
 
 `pull_image_and_stages`: Set to `false` to avoid pulling from registry (**default: true**). You might want to set this option to `false` if you plan to rebuild image from the scratch.
 
 `build_extra_args`: Provide extra arguments to `docker build`. eg: `"--compress=true --build-arg=hello=world"`
+
+[branch tip]: https://stackoverflow.com/questions/16080342/what-is-a-branch-tip-in-git
 
 ## Outputs
 
