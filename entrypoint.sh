@@ -2,6 +2,10 @@
 
 set -e
 
+dummy_image_name=my_awesome_image
+# split tags (to allow multiple comma-separated tags)
+IFS=, read -ra INPUT_IMAGE_TAG <<< "$INPUT_IMAGE_TAG"
+
 # helper functions
 _has_value() {
   local var_name=${1}
@@ -27,15 +31,47 @@ _get_full_image_name() {
   echo ${INPUT_REGISTRY:+$INPUT_REGISTRY/}${INPUT_IMAGE_NAME}
 }
 
+_tag_and_push() {
+  local tag
+  tag="${1:?You must provide a tag}"
+  docker tag $dummy_image_name "$(_get_full_image_name):$tag"
+  docker push "$(_get_full_image_name):$tag"
+}
+
 _push_git_tag() {
   [[ "$GITHUB_REF" =~ /tags/ ]] || return 0
-
   local git_tag=${GITHUB_REF##*/tags/}
   echo -e "\nPushing git tag: $git_tag"
-  local image_with_git_tag
-  image_with_git_tag="$(_get_full_image_name)":$git_tag
-  docker tag "$(_get_full_image_name)":${INPUT_IMAGE_TAG} "$image_with_git_tag"
-  docker push "$image_with_git_tag"
+  _tag_and_push $git_tag
+}
+
+_push_image_tags() {
+  local tag
+  for tag in "${INPUT_IMAGE_TAG[@]}"; do
+    echo "Pushing tag: $tag"
+    _tag_and_push $tag
+  done
+  if [ "$INPUT_PUSH_GIT_TAG" = true ]; then
+    _push_git_tag
+  fi
+}
+
+_push_image_stages() {
+  local stage_number=1
+  local stage_image
+  for stage in $(_get_stages); do
+    echo -e "\nPushing stage: $stage_number"
+    stage_image=$(_get_full_image_name)-stages:$stage_number
+    docker tag "$stage" "$stage_image"
+    docker push "$stage_image"
+    stage_number=$(( stage_number+1 ))
+  done
+
+  # push the image itself as a stage (the last one)
+  echo -e "\nPushing stage: $stage_number"
+  stage_image=$(_get_full_image_name)-stages:$stage_number
+  docker tag $dummy_image_name $stage_image
+  docker push $stage_image
 }
 
 
@@ -84,7 +120,7 @@ build_image() {
   set -x
   docker build \
     $cache_from \
-    --tag "$(_get_full_image_name)":${INPUT_IMAGE_TAG} \
+    --tag $dummy_image_name \
     --file ${INPUT_CONTEXT}/${INPUT_DOCKERFILE} \
     ${INPUT_BUILD_EXTRA_ARGS} \
     ${INPUT_CONTEXT} | tee "$BUILD_LOG"
@@ -102,28 +138,8 @@ push_image_and_stages() {
   fi
 
   echo -e "\n[Action Step] Pushing image..."
-  # push image
-  echo "Pushing tag: ${INPUT_IMAGE_TAG}"
-  docker push "$(_get_full_image_name)":${INPUT_IMAGE_TAG}
-  if [ "$INPUT_PUSH_GIT_TAG" = true ]; then
-    _push_git_tag
-  fi
-
-  # push each building stage
-  stage_number=1
-  for stage in $(_get_stages); do
-    echo -e "\nPushing stage: $stage_number"
-    stage_image=$(_get_full_image_name)-stages:$stage_number
-    docker tag "$stage" "$stage_image"
-    docker push "$stage_image"
-    stage_number=$(( stage_number+1 ))
-  done
-
-  # push the image itself as a stage (the last one)
-  echo -e "\nPushing stage: $stage_number"
-  stage_image=$(_get_full_image_name)-stages:$stage_number
-  docker tag "$(_get_full_image_name)":${INPUT_IMAGE_TAG} $stage_image
-  docker push $stage_image
+  _push_image_tags
+  _push_image_stages
 }
 
 logout_from_registry() {
