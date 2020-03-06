@@ -18,7 +18,7 @@ By default it pushes the image with all the stages to a registry (needs username
 
 `registry`: Docker registry (**default: Docker Hub's registry**).
 
-`image_tag`: Tag of the image to build (**default: latest**).
+`image_tag`: Tag(s) of the image to build (**default: latest**). You can provide multiple comma-separated tags (**eg: latest,one,another**)
 
 `context`: Docker context (**default: ./**).
 
@@ -84,7 +84,7 @@ Another example for **Google Cloud Platform** and more custom settings:
     password: "${{ secrets.DOCKER_PASSWORD }}"
     registry: gcr.io
     image_name: your_id/your_image
-    image_tag: latest
+    image_tag: latest,and,more,tags
     context: sub_folder_in_your_repo
     dockerfile: custom.dockerfile
     push_image_and_stages: false  # useful when you are setting a workflow to run on PRs
