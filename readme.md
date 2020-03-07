@@ -90,7 +90,7 @@ Another example for **Google Cloud Platform** and more custom settings:
     push_image_and_stages: false  # useful when you are setting a workflow to run on PRs
 ```
 
-> You can use AWS ECR in this way (Example taken from [this issue comment](https://github.com/whoan/docker-build-with-cache-action/issues/15#issuecomment-593490959) by @jbarop -> thanks!):
+You can use **AWS ECR** in this way (Example taken from [this issue comment](https://github.com/whoan/docker-build-with-cache-action/issues/15#issuecomment-593490959) by @jbarop -> thanks!):
 
 ```yml
 - name: Configure AWS credentials
