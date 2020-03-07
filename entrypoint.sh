@@ -135,7 +135,7 @@ push_image_and_stages() {
 
   if [ "$not_logged_in" ]; then
     echo "WARNING: Can't push when not logged in to registry" >&2
-    return
+    return 1
   fi
 
   echo -e "\n[Action Step] Pushing image..."
