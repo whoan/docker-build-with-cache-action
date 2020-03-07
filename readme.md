@@ -58,7 +58,7 @@ Minimal example:
     image_name: whoan/node
 ```
 
-You can see a full **[working example in this repo](https://github.com/whoan/docker-images/blob/master/.github/workflows/node-alpine-slim.yml)** using GitHub's registry:
+You can see a full **[working example in this repo](https://github.com/whoan/docker-images/blob/master/.github/workflows/node-alpine-slim.yml)** using **GitHub's registry**:
 
 ```yml
 - uses: whoan/docker-build-with-cache-action@v4
