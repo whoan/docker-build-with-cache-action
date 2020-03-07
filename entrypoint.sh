@@ -117,6 +117,7 @@ build_image() {
   fi
 
   # build image using cache
+  set -o pipefail
   set -x
   docker build \
     $cache_from \
