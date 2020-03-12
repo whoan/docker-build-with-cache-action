@@ -31,10 +31,15 @@ _get_full_image_name() {
   echo ${INPUT_REGISTRY:+$INPUT_REGISTRY/}${INPUT_IMAGE_NAME}
 }
 
-_tag_and_push() {
+_tag() {
   local tag
   tag="${1:?You must provide a tag}"
   docker tag $dummy_image_name "$(_get_full_image_name):$tag"
+}
+
+_push() {
+  local tag
+  tag="${1:?You must provide a tag}"
   docker push "$(_get_full_image_name):$tag"
 }
 
@@ -42,14 +47,15 @@ _push_git_tag() {
   [[ "$GITHUB_REF" =~ /tags/ ]] || return 0
   local git_tag=${GITHUB_REF##*/tags/}
   echo -e "\nPushing git tag: $git_tag"
-  _tag_and_push $git_tag
+  _tag $git_tag
+  _push $git_tag
 }
 
 _push_image_tags() {
   local tag
   for tag in "${INPUT_IMAGE_TAG[@]}"; do
-    echo "Pushing tag: $tag"
-    _tag_and_push $tag
+    echo "Pushing: $tag"
+    _push $tag
   done
   if [ "$INPUT_PUSH_GIT_TAG" = true ]; then
     _push_git_tag
@@ -128,6 +134,15 @@ build_image() {
   set +x
 }
 
+tag_image() {
+  echo -e "\n[Action Step] Tagging image..."
+  local tag
+  for tag in "${INPUT_IMAGE_TAG[@]}"; do
+    echo "Tagging: $tag"
+    _tag $tag
+  done
+}
+
 push_image_and_stages() {
   if [ "$INPUT_PUSH_IMAGE_AND_STAGES" != true ]; then
     return
@@ -157,5 +172,6 @@ check_required_input
 login_to_registry
 pull_cached_stages
 build_image
+tag_image
 push_image_and_stages
 logout_from_registry
