@@ -42,11 +42,12 @@ None
 
 The action does the following every time it is triggered:
 
-- Pull previously pushed [stages](https://docs.docker.com/develop/develop-images/multistage-build/) (if any) from the specified `registry` (default: https://hub.docker.com)
-- Build the image using cache (ie: using the pulled stages)
-- Push each stage of the built image to the registry with the name `<image_name>-stages:<1,2,3,...>`
-- Push the image itself like `<image_name>:<image_tag>`
-- (Optional) Push any git tag if available as `<image_name>:<git_tag>`
+- (Optional) Pull previously pushed [stages](https://docs.docker.com/develop/develop-images/multistage-build/) (if any) from the specified `registry` (default: https://hub.docker.com)
+- Build the image using cache (ie: using any the pulled stages)
+- Tag the image (multiple tags are allowed)
+- (Optional) Push the image with the tag(s) specified in `image_tag`
+- (Optional) Push each stage of the built image to the registry with the name `<image_name>-stages:<1,2,3,...>`
+- (Optional) Push the git tag (if available) as `<image_name>:<git_tag>`
 
 ## Example usage
 
