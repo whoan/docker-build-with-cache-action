@@ -61,6 +61,8 @@ Minimal example:
 
 You can see a full **[working example in this repo](https://github.com/whoan/docker-images/blob/master/.github/workflows/node-alpine-slim.yml)** using **GitHub's registry**:
 
+> More info [here](https://help.github.com/en/github/managing-packages-with-github-packages/configuring-docker-for-use-with-github-packages#authenticating-to-github-packages) on how to get username/password for GitHub's registry.
+
 ```yml
 - uses: whoan/docker-build-with-cache-action@v4
   with:
@@ -73,8 +75,6 @@ You can see a full **[working example in this repo](https://github.com/whoan/doc
     context: node-alpine-slim
     build_extra_args: "--compress=true --build-arg=hello=world"
 ```
-
-> More info [here](https://help.github.com/en/github/managing-packages-with-github-packages/configuring-docker-for-use-with-github-packages#authenticating-to-github-packages) on how to get username/password for GitHub's registry.
 
 Another example for **Google Cloud Platform** and more custom settings:
 
