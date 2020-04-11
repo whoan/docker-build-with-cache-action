@@ -78,11 +78,13 @@ You can see a full **[working example in this repo](https://github.com/whoan/doc
 
 Another example for **Google Cloud Platform** and more custom settings:
 
+> More info [here](https://cloud.google.com/container-registry/docs/advanced-authentication#json-key) on how to get GCloud JSON key.
+
 ```yml
 - uses: whoan/docker-build-with-cache-action@v4
   with:
     username: _json_key
-    password: "${{ secrets.DOCKER_PASSWORD }}"
+    password: "${{ secrets.GCLOUD_JSON_KEY }}"
     registry: gcr.io
     image_name: your_id/your_image
     image_tag: latest,and,more,tags
