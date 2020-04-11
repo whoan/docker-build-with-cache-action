@@ -96,7 +96,7 @@ Finally, an example to use **AWS ECR**:
 > You don't even need to create the repositories in advance, as this action takes care of that for you!
 
 ```yml
-- uses: whoan/docker-build-with-cache-action@add-support-to-ecr
+- uses: whoan/docker-build-with-cache-action@v4
   with:
     username: "${{ secrets.AWS_ACCESS_KEY_ID }}"
     password: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
