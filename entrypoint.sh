@@ -118,19 +118,19 @@ check_required_input() {
 login_to_registry() {
   echo -e "\n[Action Step] Log in to registry..."
   if _has_value USERNAME "${INPUT_USERNAME}" && _has_value PASSWORD "${INPUT_PASSWORD}"; then
-    local log="Could not log in (please check credentials)"
     if __is_aws_ecr; then
       __login_to_aws_ecr && __create_aws_ecr_repos && return 0
     else
       echo "${INPUT_PASSWORD}" | docker login -u "${INPUT_USERNAME}" --password-stdin "${INPUT_REGISTRY}" \
         && return 0
     fi
+    echo "Could not log in (please check credentials)" >&2
   else
-    local log="No credentials provided"
+    echo "No credentials provided" >&2
   fi
 
   not_logged_in=true
-  echo "INFO: $log - Won't be able to pull from private repos, nor to push to public/private repos" >&2
+  echo "INFO: Won't be able to pull from private repos, nor to push to public/private repos" >&2
 }
 
 pull_cached_stages() {
