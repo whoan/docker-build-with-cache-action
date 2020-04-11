@@ -91,29 +91,17 @@ Another example for **Google Cloud Platform** and more custom settings:
     push_image_and_stages: false  # useful when you are setting a workflow to run on PRs
 ```
 
-You can use **AWS ECR** in this way (Example taken from [this issue comment](https://github.com/whoan/docker-build-with-cache-action/issues/15#issuecomment-593490959) by @jbarop -> thanks!):
+Finally, an example to use **AWS ECR**:
+
+> You don't even need to create the repositories in advance, as this action takes care of that for you!
 
 ```yml
-- name: Configure AWS credentials
-  uses: aws-actions/configure-aws-credentials@v4
+- uses: whoan/docker-build-with-cache-action@v4
   with:
-    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    aws-region: your-region-1
-
-- name: Get AWS ECR credentials
-  id: ecr-credentials
-  run: |
-    echo "::set-output name=username::AWS"
-    echo "::set-output name=password::`aws ecr get-login-password`"
-
-- name: Docker build
-  uses: whoan/docker-build-with-cache-action@master
-  with:
-    username: ${{ steps.ecr-credentials.outputs.username }}
-    password: ${{ steps.ecr-credentials.outputs.password }}
-    registry: ${{ secrets.AWS_ECR_REGISTRY }}
-    image_name: some-image-name
+    username: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+    password: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+    image_name: node
+    registry: 123456789.dkr.ecr.us-west-1.amazonaws.com
 ```
 
 ## Cache is not working?
