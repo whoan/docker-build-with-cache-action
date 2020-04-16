@@ -16,19 +16,22 @@ By default it pushes the image with all the stages to a registry (needs username
 
 `password`: Docker registry's password (needed to push image to repository, or to pull from private repository).
 
-`registry`: Docker registry (**default: Docker Hub's registry**).
+`registry`: Docker registry (default: *Docker Hub's registry*).
 
-`image_tag`: Tag(s) of the image to build (**default: latest**). You can provide multiple comma-separated tags (**eg: latest,one,another**)
+`image_tag`: Tag(s) of the image to build (default: `latest`).  
+You can provide multiple comma-separated tags (eg: *latest,one,another*)
 
-`context`: Docker context (**default: ./**).
+`context`: Docker context (default: `./`).
 
-`dockerfile`: Dockerfile filename path (**default: "$context"/Dockerfile**)
+`dockerfile`: Dockerfile filename path (default: `"$context"/Dockerfile`)
 
-`push_image_and_stages`: Set to `false` to avoid pushing to registry (**default: true**). You might want to set this option to `false` if you plan to use this action for PRs to avoid overriding cached stages in the registry.
+`push_image_and_stages`: Set to `false` to avoid pushing to registry (default: `true`).  
+Set it to `false` if you plan to use this action for PRs, to avoid overriding cached stages in the registry.
 
-`push_git_tag`: In addition to `image_tag`, you can also push the git tag in your [branch tip][branch tip] (**default: false**)
+`push_git_tag`: In addition to `image_tag`, you can also push the git tag in your [branch tip][branch tip] (default: `false`)
 
-`pull_image_and_stages`: Set to `false` to avoid pulling from registry (**default: true**). You might want to set this option to `false` if you plan to rebuild image from the scratch.
+`pull_image_and_stages`: Set to `false` to avoid pulling from registry (default: `true`).  
+Set it to `false` if you plan to rebuild an image from scratch.
 
 `build_extra_args`: Provide extra arguments to `docker build`. eg: `"--compress=true --build-arg=hello=world"`
 
