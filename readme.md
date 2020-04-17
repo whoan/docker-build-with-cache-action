@@ -58,7 +58,7 @@ The action does the following every time it is triggered:
 Minimal example:
 
 ```yml
-- uses: whoan/docker-build-with-cache-action@v4
+- uses: whoan/docker-build-with-cache-action@v5
   with:
     image_name: whoan/node
 ```
@@ -68,7 +68,7 @@ You can see a full **[working example in this repo](https://github.com/whoan/doc
 > More info [here](https://help.github.com/en/github/managing-packages-with-github-packages/configuring-docker-for-use-with-github-packages#authenticating-to-github-packages) on how to get username/password for GitHub's registry.
 
 ```yml
-- uses: whoan/docker-build-with-cache-action@v4
+- uses: whoan/docker-build-with-cache-action@v5
   with:
     username: "${{ secrets.DOCKER_USERNAME }}"
     password: "${{ secrets.DOCKER_PASSWORD }}"
@@ -85,7 +85,7 @@ Another example for **Google Cloud Platform** and more custom settings:
 > More info [here](https://cloud.google.com/container-registry/docs/advanced-authentication#json-key) on how to get GCloud JSON key.
 
 ```yml
-- uses: whoan/docker-build-with-cache-action@v4
+- uses: whoan/docker-build-with-cache-action@v5
   with:
     username: _json_key
     password: "${{ secrets.GCLOUD_JSON_KEY }}"
@@ -97,12 +97,12 @@ Another example for **Google Cloud Platform** and more custom settings:
     push_image_and_stages: false  # useful when you are setting a workflow to run on PRs
 ```
 
-Finally, an example to use **AWS ECR**:
+Finally, (**since v5**) an example to use **AWS ECR**:
 
 > You don't even need to create the repositories in advance, as this action takes care of that for you!
 
 ```yml
-- uses: whoan/docker-build-with-cache-action@v4
+- uses: whoan/docker-build-with-cache-action@v5
   with:
     username: "${{ secrets.AWS_ACCESS_KEY_ID }}"
     password: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
