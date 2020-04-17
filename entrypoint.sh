@@ -95,8 +95,7 @@ __aws() {
 }
 
 __login_to_aws_ecr() {
-  __aws ecr get-login-password |
-      docker login --username AWS --password-stdin $INPUT_REGISTRY
+  __aws ecr get-authorization-token --output text --query 'authorizationData[].authorizationToken' | base64 -d | cut -d: -f2 | docker login --username AWS --password-stdin $INPUT_REGISTRY
 }
 
 __create_aws_ecr_repos() {
