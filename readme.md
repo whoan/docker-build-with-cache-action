@@ -63,15 +63,15 @@ Minimal example:
     image_name: whoan/node
 ```
 
-You can see a full **[working example in this repo](https://github.com/whoan/docker-images/blob/master/.github/workflows/node-alpine-slim.yml)** using **GitHub's registry**:
+Using **GitHub's registry**:
 
-> More info [here](https://help.github.com/en/github/managing-packages-with-github-packages/configuring-docker-for-use-with-github-packages#authenticating-to-github-packages) on how to get username/password for GitHub's registry.
+> [GitHub automatically creates a GITHUB_TOKEN secret to use in your workflow](https://help.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token#about-the-github_token-secret).
 
 ```yml
 - uses: whoan/docker-build-with-cache-action@v5
   with:
-    username: "${{ secrets.DOCKER_USERNAME }}"
-    password: "${{ secrets.DOCKER_PASSWORD }}"
+    username: your_usernames
+    password: "${{ secrets.GITHUB_TOKEN }}"
     image_name: whoan/docker-images/node
     image_tag: alpine-slim
     push_git_tag: true
