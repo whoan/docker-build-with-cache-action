@@ -38,7 +38,7 @@ Built-in support for the most known registries: Docker Hub, AWS ECR, GitHub's re
 
 ## Outputs
 
-None
+`FULL_IMAGE_NAME`: Full name of the Docker Image with the Registry (if provided) and Namespace included (e.g.: `docker.pkg.github.com/whoan/hello-world/hello-world`)
 
 ## How it works
 
