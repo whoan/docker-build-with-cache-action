@@ -4,9 +4,7 @@ This action builds your docker image and caches the stages (supports multi-stage
 
 By default, it pushes the image with all the stages to a registry (needs username and password), but you can disable this feature by setting `push_image_and_stages` to `false`.
 
-Built-in support for Docker Hub, AWS ECR, GitHub's registry, and Google Cloud.
-
-> **IMPORTANT!** To use built-in support to AWS ECR, you need to use v5 (see example below)
+Built-in support for the most known registries: Docker Hub, AWS ECR, GitHub's registry, and Google Cloud.
 
 ## Inputs
 
@@ -55,32 +53,34 @@ The action does the following every time it is triggered:
 
 ## Example usage
 
-Minimal example:
+Find working minimal examples for the most known registries in [this repo](https://github.com/whoan/hello-world/tree/master/.github/workflows).
+
+### Docker Hub
+
+> If you don't specify a registry, Docker Hub is the default
 
 ```yml
 - uses: whoan/docker-build-with-cache-action@v5
   with:
-    image_name: whoan/node
+    username: whoan
+    password: "${{ secrets.DOCKER_HUB_PASSWORD }}"
+    image_name: hello-world
 ```
 
-Using **GitHub's registry**:
+### GitHub Registry
 
 > [GitHub automatically creates a GITHUB_TOKEN secret to use in your workflow](https://help.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token#about-the-github_token-secret).
 
 ```yml
 - uses: whoan/docker-build-with-cache-action@v5
   with:
-    username: your_usernames
-    password: "${{ secrets.GITHUB_TOKEN }}"
-    image_name: whoan/docker-images/node
-    image_tag: alpine-slim
-    push_git_tag: true
+    username: whoan
+    password: "${{ secrets.GITHUB_TOKEN }}"  # you don't need to manually set this secret. GitHub does it on your behalf
     registry: docker.pkg.github.com
-    context: node-alpine-slim
-    build_extra_args: "--compress=true --build-arg=hello=world"
+    image_name: hello-world
 ```
 
-Another example for **Google Cloud Platform** and more custom settings:
+### Google Cloud Registry
 
 > More info [here](https://cloud.google.com/container-registry/docs/advanced-authentication#json-key) on how to get GCloud JSON key.
 
@@ -90,14 +90,10 @@ Another example for **Google Cloud Platform** and more custom settings:
     username: _json_key
     password: "${{ secrets.GCLOUD_JSON_KEY }}"
     registry: gcr.io
-    image_name: your_id/your_image
-    image_tag: latest,and,more,tags
-    context: sub_folder_in_your_repo
-    dockerfile: custom.dockerfile
-    push_image_and_stages: false  # useful when you are setting a workflow to run on PRs
+    image_name: hello-world
 ```
 
-Finally, (**since v5**) an example to use **AWS ECR**:
+### AWS ECR
 
 > You don't even need to create the repositories in advance, as this action takes care of that for you!
 
@@ -106,8 +102,25 @@ Finally, (**since v5**) an example to use **AWS ECR**:
   with:
     username: "${{ secrets.AWS_ACCESS_KEY_ID }}"
     password: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-    image_name: node
-    registry: 123456789.dkr.ecr.us-west-1.amazonaws.com
+    registry: 861729690598.dkr.ecr.us-west-1.amazonaws.com
+    image_name: hello-world
+```
+
+### Example with more options
+
+```yml
+- uses: whoan/docker-build-with-cache-action@v5
+  with:
+    username: whoan
+    password: "${{ secrets.GITHUB_TOKEN }}"
+    image_name: whoan/docker-images/node
+    image_tag: alpine-slim,another-tag
+    push_git_tag: true
+    registry: docker.pkg.github.com
+    context: node-alpine-slim
+    dockerfile: custom.Dockerfile
+    build_extra_args: "--compress=true --build-arg=hello=world"
+    push_image_and_stages: false  # useful when you are setting a workflow to run on PRs
 ```
 
 ## Cache is not working?
