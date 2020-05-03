@@ -24,6 +24,13 @@ _is_gcloud_registry() {
   [ "$INPUT_REGISTRY" = gcr.io ]
 }
 
+_is_aws_ecr() {
+  [[ $INPUT_REGISTRY =~ ^.+\.dkr\.ecr\.([a-z0-9-]+)\.amazonaws\.com$ ]]
+  is_aws_ecr=$?
+  aws_region=${BASH_REMATCH[1]}
+  return $is_aws_ecr
+}
+
 _image_name_contains_namespace() {
   [[ "$INPUT_IMAGE_NAME" =~ / ]]
 }
@@ -105,13 +112,6 @@ _push_image_stages() {
   stage_image=$(_get_full_image_name)-stages:$stage_number
   docker tag $dummy_image_name $stage_image
   docker push $stage_image
-}
-
-_is_aws_ecr() {
-  [[ $INPUT_REGISTRY =~ ^.+\.dkr\.ecr\.([a-z0-9-]+)\.amazonaws\.com$ ]]
-  is_aws_ecr=$?
-  aws_region=${BASH_REMATCH[1]}
-  return $is_aws_ecr
 }
 
 _aws() {
