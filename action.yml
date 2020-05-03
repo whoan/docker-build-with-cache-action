@@ -17,7 +17,7 @@ inputs:
     description: "(Optional) Docker registry (default: Docker Hub's registry)"
     required: false
   image_tag:
-    description: "(Optional) Tag of the image to build (default: latest)"
+    description: "(Optional) Tag/s of the image to build (default: latest)"
     required: false
     default: latest
   context:
