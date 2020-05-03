@@ -107,27 +107,27 @@ _push_image_stages() {
   docker push $stage_image
 }
 
-__is_aws_ecr() {
+_is_aws_ecr() {
   [[ $INPUT_REGISTRY =~ ^.+\.dkr\.ecr\.([a-z0-9-]+)\.amazonaws\.com$ ]]
   is_aws_ecr=$?
   aws_region=${BASH_REMATCH[1]}
   return $is_aws_ecr
 }
 
-__aws() {
+_aws() {
   docker run --rm \
     --env AWS_ACCESS_KEY_ID=$INPUT_USERNAME \
     --env AWS_SECRET_ACCESS_KEY=$INPUT_PASSWORD \
     amazon/aws-cli:2.0.7 --region $aws_region "$@"
 }
 
-__login_to_aws_ecr() {
-  __aws ecr get-authorization-token --output text --query 'authorizationData[].authorizationToken' | base64 -d | cut -d: -f2 | docker login --username AWS --password-stdin $INPUT_REGISTRY
+_login_to_aws_ecr() {
+  _aws ecr get-authorization-token --output text --query 'authorizationData[].authorizationToken' | base64 -d | cut -d: -f2 | docker login --username AWS --password-stdin $INPUT_REGISTRY
 }
 
-__create_aws_ecr_repos() {
-  __aws ecr create-repository --repository-name "$INPUT_IMAGE_NAME" 2>&1 | grep -v RepositoryAlreadyExistsException
-  __aws ecr create-repository --repository-name "$INPUT_IMAGE_NAME"-stages 2>&1 | grep -v RepositoryAlreadyExistsException
+_create_aws_ecr_repos() {
+  _aws ecr create-repository --repository-name "$INPUT_IMAGE_NAME" 2>&1 | grep -v RepositoryAlreadyExistsException
+  _aws ecr create-repository --repository-name "$INPUT_IMAGE_NAME"-stages 2>&1 | grep -v RepositoryAlreadyExistsException
   return 0
 }
 
@@ -154,8 +154,8 @@ check_required_input() {
 login_to_registry() {
   echo -e "\n[Action Step] Log in to registry..."
   if _has_value USERNAME "${INPUT_USERNAME}" && _has_value PASSWORD "${INPUT_PASSWORD}"; then
-    if __is_aws_ecr; then
-      __login_to_aws_ecr && __create_aws_ecr_repos && return 0
+    if _is_aws_ecr; then
+      _login_to_aws_ecr && _create_aws_ecr_repos && return 0
     else
       echo "${INPUT_PASSWORD}" | docker login -u "${INPUT_USERNAME}" --password-stdin "${INPUT_REGISTRY}" \
         && return 0
