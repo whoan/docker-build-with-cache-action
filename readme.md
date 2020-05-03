@@ -114,7 +114,7 @@ Finally, (**since v5**) an example to use **AWS ECR**:
 
 Be aware of the conditions that can invalidate your cache:
 
-- Be specific with the base images. If you start from an image with a `latest` tag, it may download different versions when the action is triggered, and it will invalidate the cache.
+- Be specific with the base images. If you start from an image with the `latest` tag, it may download different versions when the action is triggered, and it will invalidate the cache.
 
 ## License
 
