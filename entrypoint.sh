@@ -2,10 +2,6 @@
 
 set -e
 
-dummy_image_name=my_awesome_image
-# split tags (to allow multiple comma-separated tags)
-IFS=, read -ra INPUT_IMAGE_TAG <<< "$INPUT_IMAGE_TAG"
-
 # helper functions
 _has_value() {
   local var_name=${1}
@@ -13,6 +9,37 @@ _has_value() {
   if [ -z "$var_value" ]; then
     echo "INFO: Missing value $var_name" >&2
     return 1
+  fi
+}
+
+_is_docker_hub() {
+  [ -z "$INPUT_REGISTRY" ] || [[ "$INPUT_REGISTRY" =~ \.docker\.(com|io)(/|$) ]]
+}
+
+_is_github_registry() {
+  [ "$INPUT_REGISTRY" = docker.pkg.github.com ]
+}
+
+_is_gcloud_registry() {
+  [ "$INPUT_REGISTRY" = gcr.io ]
+}
+
+_image_name_contains_namespace() {
+  [[ "$INPUT_IMAGE_NAME" =~ / ]]
+}
+
+_set_namespace() {
+  if ! _image_name_contains_namespace; then
+    if _is_docker_hub; then
+      NAMESPACE=$INPUT_USERNAME
+    elif _is_github_registry; then
+      NAMESPACE=$GITHUB_REPOSITORY
+    elif _is_gcloud_registry; then
+      # take project_id from Json Key
+      NAMESPACE=$(echo "${INPUT_PASSWORD}" | sed -rn 's@.+project_id" *: *"([^"]+).+@\1@p' 2> /dev/null)
+      [ "$NAMESPACE" ] || return 1
+    fi
+    # aws-ecr does not need a namespace
   fi
 }
 
@@ -28,7 +55,7 @@ _get_stages() {
 }
 
 _get_full_image_name() {
-  echo ${INPUT_REGISTRY:+$INPUT_REGISTRY/}${INPUT_IMAGE_NAME}
+  echo ${INPUT_REGISTRY:+$INPUT_REGISTRY/}${NAMESPACE:+$NAMESPACE/}${INPUT_IMAGE_NAME}
 }
 
 _tag() {
@@ -106,6 +133,16 @@ __create_aws_ecr_repos() {
 
 
 # action steps
+init_variables() {
+  dummy_image_name=my_awesome_image
+  # split tags (to allow multiple comma-separated tags)
+  IFS=, read -ra INPUT_IMAGE_TAG <<< "$INPUT_IMAGE_TAG"
+  if ! _set_namespace; then
+    echo "Could not set namespace" >&2
+    exit 1
+  fi
+}
+
 check_required_input() {
   echo -e "\n[Action Step] Checking required input..."
   _has_value IMAGE_NAME "${INPUT_IMAGE_NAME}" \
@@ -196,6 +233,7 @@ logout_from_registry() {
 
 
 # run the action
+init_variables
 check_required_input
 login_to_registry
 pull_cached_stages
