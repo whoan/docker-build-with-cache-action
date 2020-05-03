@@ -47,9 +47,6 @@ inputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
-  env:
-    PULL_STAGES_LOG: pull-stages-output.log
-    BUILD_LOG: build-output.log
 
 branding:
   icon: 'anchor'

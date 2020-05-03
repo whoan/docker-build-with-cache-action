@@ -68,7 +68,7 @@ _get_full_image_name() {
 _tag() {
   local tag
   tag="${1:?You must provide a tag}"
-  docker tag $dummy_image_name "$(_get_full_image_name):$tag"
+  docker tag $DUMMY_IMAGE_NAME "$(_get_full_image_name):$tag"
 }
 
 _push() {
@@ -110,7 +110,7 @@ _push_image_stages() {
   # push the image itself as a stage (the last one)
   echo -e "\nPushing stage: $stage_number"
   stage_image=$(_get_full_image_name)-stages:$stage_number
-  docker tag $dummy_image_name $stage_image
+  docker tag $DUMMY_IMAGE_NAME $stage_image
   docker push $stage_image
 }
 
@@ -134,7 +134,9 @@ _create_aws_ecr_repos() {
 
 # action steps
 init_variables() {
-  dummy_image_name=my_awesome_image
+  DUMMY_IMAGE_NAME=my_awesome_image
+  PULL_STAGES_LOG=pull-stages-output.log
+  BUILD_LOG=build-output.log
   # split tags (to allow multiple comma-separated tags)
   IFS=, read -ra INPUT_IMAGE_TAG <<< "$INPUT_IMAGE_TAG"
   if ! _set_namespace; then
@@ -192,7 +194,7 @@ build_image() {
   set -x
   docker build \
     $cache_from \
-    --tag $dummy_image_name \
+    --tag $DUMMY_IMAGE_NAME \
     --file ${INPUT_CONTEXT}/${INPUT_DOCKERFILE} \
     ${INPUT_BUILD_EXTRA_ARGS} \
     ${INPUT_CONTEXT} | tee "$BUILD_LOG"
