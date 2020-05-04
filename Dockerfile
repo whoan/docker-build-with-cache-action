@@ -5,6 +5,6 @@ LABEL "repository"="https://github.com/whoan/docker-build-with-cache-action"
 
 COPY entrypoint.sh /entrypoint.sh
 
-RUN apk add --no-cache bash
+RUN apk add --no-cache bash grep
 
 ENTRYPOINT ["/entrypoint.sh"]

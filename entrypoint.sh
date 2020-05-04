@@ -57,8 +57,10 @@ _get_max_stage_number() {
 }
 
 _get_stages() {
-  grep -EB1 '^Step [0-9]+/[0-9]+ : FROM' "$BUILD_LOG" |
-    sed -rn 's/ *-*> (.+)/\1/p'
+  # genetare pairs of stage_name:stage_hash
+  grep -EB1 '^(Step [0-9]+/[0-9]+ : FROM|Successfully built)' "$BUILD_LOG" |
+    grep -Po "((?<=AS ).+|(?<=-> ).+)$" |
+    sed 'N;s/\n/:/'
 }
 
 _get_full_image_name() {
@@ -97,21 +99,25 @@ _push_image_tags() {
 }
 
 _push_image_stages() {
-  local stage_number=1
+  local stage
+  local stage_name
+  local stage_hash
   local stage_image
-  for stage in $(_get_stages); do
-    echo -e "\nPushing stage: $stage_number"
-    stage_image=$(_get_full_image_name)-stages:$stage_number
-    docker tag "$stage" "$stage_image"
-    docker push "$stage_image"
-    stage_number=$(( stage_number+1 ))
-  done
 
-  # push the image itself as a stage (the last one)
-  echo -e "\nPushing stage: $stage_number"
-  stage_image=$(_get_full_image_name)-stages:$stage_number
-  docker tag $DUMMY_IMAGE_NAME $stage_image
-  docker push $stage_image
+  for stage in $(_get_stages); do
+    # last stage may not have a name
+    if [[ $stage =~ : ]]; then
+      stage_name=${stage%:*}
+      stage_hash=${stage#*:}
+    else
+      stage_name=last-stage
+      stage_hash=$stage
+    fi
+    echo -e "\nPushing stage: $stage_name"
+    stage_image=$(_get_full_image_name)-stages:$stage_name
+    docker tag "$stage_hash" "$stage_image"
+    docker push "$stage_image"
+  done
 }
 
 _aws() {
