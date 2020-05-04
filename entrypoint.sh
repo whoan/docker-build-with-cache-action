@@ -59,7 +59,8 @@ _get_max_stage_number() {
 _get_stages() {
   # genetare pairs of stage_name:stage_hash
   grep -EB1 '^(Step [0-9]+/[0-9]+ : FROM|Successfully built)' "$BUILD_LOG" |
-    grep -Po "((?<=AS ).+|(?<=-> ).+)$" |
+    grep -E "FROM|-->" |
+    sed -r 's/.+FROM [^ ]+( AS )?//; s/.+-> //' |
     sed 'N;s/\n/:/'
 }
 
@@ -100,19 +101,20 @@ _push_image_tags() {
 
 _push_image_stages() {
   local stage
+  local unnamed_stage_number=1
   local stage_name
   local stage_hash
   local stage_image
 
   for stage in $(_get_stages); do
-    # last stage may not have a name
-    if [[ $stage =~ : ]]; then
-      stage_name=${stage%:*}
-      stage_hash=${stage#*:}
-    else
-      stage_name=last-stage
-      stage_hash=$stage
+    stage_name=${stage%:*}
+    stage_hash=${stage#*:}
+
+    if [ -z "$stage_name" ]; then
+      stage_name=unnamed-$unnamed_stage_number
+      unnamed_stage_number=$(( unnamed_stage_number+1 ))
     fi
+
     echo -e "\nPushing stage: $stage_name"
     stage_image=$(_get_full_image_name)-stages:$stage_name
     docker tag "$stage_hash" "$stage_image"
