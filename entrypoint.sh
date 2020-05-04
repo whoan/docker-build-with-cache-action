@@ -50,10 +50,11 @@ _set_namespace() {
   fi
 }
 
-_get_max_stage_number() {
-  sed -nr 's/^([0-9]+): Pulling from.+/\1/p' "$PULL_STAGES_LOG" |
-    sort -n |
-    tail -n 1
+_get_comma_separated_stages() {
+  local stages=( $(sed -nr 's/^(.+): Pulling from.+/\1/p' "$PULL_STAGES_LOG") )
+  local comma_separated_stages
+  comma_separated_stages=$(printf ",%s" "${stages[@]}")
+  echo ${comma_separated_stages:1}
 }
 
 _get_stages() {
@@ -189,11 +190,11 @@ pull_cached_stages() {
 
 build_image() {
   echo -e "\n[Action Step] Building image..."
-  max_stage=$(_get_max_stage_number)
+  comma_separated_stages=$(_get_comma_separated_stages)
 
   # create param to use (multiple) --cache-from options
-  if [ "$max_stage" ]; then
-    cache_from=$(eval "echo --cache-from=$(_get_full_image_name)-stages:{1..$max_stage}")
+  if [ "$comma_separated_stages" ]; then
+    cache_from=$(eval "echo --cache-from=$(_get_full_image_name)-stages:{$comma_separated_stages}")
     echo "Use cache: $cache_from"
   fi
 
