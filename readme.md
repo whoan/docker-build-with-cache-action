@@ -10,7 +10,7 @@ Built-in support for the most known registries: Docker Hub, AWS ECR, GitHub's re
 
 ### Required
 
-`image_name`: Image name with namespace (e.g. *whoan/node*).
+`image_name`: Image name (e.g. *node*).
 
 ### Optional
 
