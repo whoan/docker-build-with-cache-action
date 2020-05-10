@@ -211,7 +211,9 @@ tag_image() {
 }
 
 push_image_and_stages() {
-  if [ "$INPUT_PUSH_IMAGE_AND_STAGES" != true ]; then
+  echo -e "\n[Action Step] Pushing image..."
+  if ! $INPUT_PUSH_IMAGE_AND_STAGES; then
+    echo "Not pushing" >&2
     return
   fi
 
@@ -220,7 +222,6 @@ push_image_and_stages() {
     return 1
   fi
 
-  echo -e "\n[Action Step] Pushing image..."
   _push_image_tags
   _push_image_stages
 }
