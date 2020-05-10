@@ -44,6 +44,10 @@ inputs:
     description: "(Optional) Extra arguments to pass to docker build"
     required: false
 
+outputs:
+  FULL_IMAGE_NAME:
+    description: Full name of the Docker Image with the Registry (if provided) and Namespace included
+
 runs:
   using: 'docker'
   image: 'Dockerfile'
