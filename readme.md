@@ -26,7 +26,7 @@ Built-in support for the most known registries: Docker Hub, AWS ECR, GitHub's re
 
 `dockerfile`: Dockerfile filename path (default: `"$context"/Dockerfile`)
 
-`push_image_and_stages`: Set to `false` to avoid pushing to the registry. Useful when you use `on: pull_request` (default: `true`).
+`push_image_and_stages`: Test any command before pushing. Use `false` to avoid pushing to the registry (default: `true`).
 
 `push_git_tag`: In addition to `image_tag`, you can also push the git tag in your [branch tip][branch tip] (default: `false`).
 
@@ -114,13 +114,13 @@ Find working minimal examples for the most known registries in [this repo](https
     username: whoan
     password: "${{ secrets.GITHUB_TOKEN }}"
     image_name: whoan/docker-images/node
-    image_tag: alpine-slim,another-tag
+    image_tag: alpine-slim,another-tag,latest
     push_git_tag: true
     registry: docker.pkg.github.com
     context: node-alpine-slim
     dockerfile: custom.Dockerfile
     build_extra_args: "--compress=true --build-arg=hello=world"
-    push_image_and_stages: false  # useful when you are setting a workflow to run on PRs
+    push_image_and_stages: docker run my_awesome_image:latest  # eg: push only if docker run succeed
 ```
 
 ## Cache is not working?
