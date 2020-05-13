@@ -13,6 +13,9 @@ inputs:
   password:
     description: (Optional) Docker's registry password (needed to push image to repository, or to pull from private repository)
     required: false
+  session:
+    description: (Optional) Docker registry's session (extra auth parameters). For the AWS ECR, means setting AWS_SESSION_TOKEN environment variable).
+    required: false
   registry:
     description: "(Optional) Docker registry (default: Docker Hub's registry)"
     required: false
