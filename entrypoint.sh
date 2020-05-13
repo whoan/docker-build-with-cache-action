@@ -214,7 +214,7 @@ push_image_and_stages() {
   echo -e "\n[Action Step] Pushing image..."
   if ! $INPUT_PUSH_IMAGE_AND_STAGES; then
     echo "Not pushing" >&2
-    return
+    return 1
   fi
 
   if [ "$not_logged_in" ]; then
