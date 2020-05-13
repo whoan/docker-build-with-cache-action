@@ -49,7 +49,7 @@ _set_namespace() {
     # aws-ecr does not need a namespace
   fi
   # set namespace to all lower, capital letters are not supported
-  NAMESPACE=$(echo $NAMESPACE | tr '[:lower:]' '[:upper:]')
+  NAMESPACE=${NAMESPACE,,}
 }
 
 _get_max_stage_number() {
