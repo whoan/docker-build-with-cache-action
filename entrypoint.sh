@@ -221,7 +221,7 @@ push_image_and_stages() {
   fi
 
   if [ "$not_logged_in" ]; then
-    echo "ERROR: Can't push when not logged in to registry. Set push_image_and_stages=false if you don't want to push" >&2
+    echo "ERROR: Can't push when not logged in to registry. Set \"push_image_and_stages: false\" if you don't want to push" >&2
     return 1
   fi
 
