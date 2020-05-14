@@ -133,6 +133,14 @@ _create_aws_ecr_repos() {
   return 0
 }
 
+_docker_login() {
+  if _is_aws_ecr; then
+    { _login_to_aws_ecr && _create_aws_ecr_repos; } || return 1
+  else
+    echo "${INPUT_PASSWORD}" | docker login -u "${INPUT_USERNAME}" --password-stdin "${INPUT_REGISTRY}" || return 1
+  fi
+  trap logout_from_registry EXIT
+}
 
 # action steps
 init_variables() {
@@ -158,17 +166,11 @@ check_required_input() {
 login_to_registry() {
   echo -e "\n[Action Step] Log in to registry..."
   if _has_value USERNAME "${INPUT_USERNAME}" && _has_value PASSWORD "${INPUT_PASSWORD}"; then
-    if _is_aws_ecr; then
-      _login_to_aws_ecr && _create_aws_ecr_repos && return 0
-    else
-      echo "${INPUT_PASSWORD}" | docker login -u "${INPUT_USERNAME}" --password-stdin "${INPUT_REGISTRY}" \
-        && return 0
-    fi
+    _docker_login && return 0
     echo "Could not log in (please check credentials)" >&2
   else
     echo "No credentials provided" >&2
   fi
-
   not_logged_in=true
   echo "INFO: Won't be able to pull from private repos, nor to push to public/private repos" >&2
 }
@@ -230,9 +232,6 @@ push_image_and_stages() {
 }
 
 logout_from_registry() {
-  if [ "$not_logged_in" ]; then
-    return
-  fi
   echo -e "\n[Action Step] Log out from registry..."
   docker logout "${INPUT_REGISTRY}"
 }
@@ -246,6 +245,5 @@ pull_cached_stages
 build_image
 tag_image
 push_image_and_stages
-logout_from_registry
 
 echo "::set-output name=FULL_IMAGE_NAME::$(_get_full_image_name)"
