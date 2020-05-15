@@ -18,7 +18,7 @@ Built-in support for the most known registries: Docker Hub, AWS ECR, GitHub's re
 
 `password`: Docker registry's password (needed to push images to the repository, or to pull from a private repository).
 
-`session` : (Optional) Docker registry's session (extra auth parameters). For the AWS ECR, means setting AWS_SESSION_TOKEN environment variable).
+`session` : (Optional) Docker registry's session (extra auth parameters). For the AWS ECR, means setting AWS_SESSION_TOKEN environment variable.
 
 `registry`: Docker registry (default: *Docker Hub's registry*).
 
@@ -104,7 +104,7 @@ Find working minimal examples for the most known registries in [this repo](https
   with:
     username: "${{ secrets.AWS_ACCESS_KEY_ID }}"
     password: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-    session: "${{ secrets.AWS_SESSION_TOKEN }}"
+    session:  "${{ secrets.AWS_SESSION_TOKEN }}"  # if you need role assumption
     registry: 861729690598.dkr.ecr.us-west-1.amazonaws.com
     image_name: hello-world
 ```
