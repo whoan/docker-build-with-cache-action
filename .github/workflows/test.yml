@@ -33,6 +33,7 @@ jobs:
 
     - uses: ./
       with:
+        username: ${{ github.repository_owner }}
         password: "${{ secrets.GITHUB_TOKEN }}"
         registry: docker.pkg.github.com
         image_name: ${{ github.repository }}
