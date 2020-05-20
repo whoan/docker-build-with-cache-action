@@ -35,10 +35,7 @@ jobs:
       id: sha8
       env:
         GIT_SHA: ${{ github.sha }}
-      run: |
-        SHA8=$(echo ${GIT_SHA} | cut -c1-8)
-        echo "SHA8: ${SHA8}"
-        echo "::set-output name=sha8::${SHA8}"
+      run: ./.github/workflows/sha8.sh
 
     - uses: ./
       with:
