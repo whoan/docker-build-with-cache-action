@@ -64,13 +64,13 @@ _get_stages() {
 }
 
 _get_full_image_name() {
-  echo ${INPUT_REGISTRY:+$INPUT_REGISTRY/}${NAMESPACE:+$NAMESPACE/}${INPUT_IMAGE_NAME}
+  echo ${INPUT_REGISTRY:+$INPUT_REGISTRY/}${NAMESPACE:+$NAMESPACE/}"${INPUT_IMAGE_NAME}"
 }
 
 _tag() {
   local tag
   tag="${1:?You must provide a tag}"
-  docker tag $DUMMY_IMAGE_NAME "$(_get_full_image_name):$tag"
+  docker tag "$DUMMY_IMAGE_NAME" "$(_get_full_image_name):$tag"
 }
 
 _push() {
@@ -83,15 +83,15 @@ _push_git_tag() {
   [[ "$GITHUB_REF" =~ /tags/ ]] || return 0
   local git_tag=${GITHUB_REF##*/tags/}
   echo -e "\nPushing git tag: $git_tag"
-  _tag $git_tag
-  _push $git_tag
+  _tag "$git_tag"
+  _push "$git_tag"
 }
 
 _push_image_tags() {
   local tag
   for tag in "${INPUT_IMAGE_TAG[@]}"; do
     echo "Pushing: $tag"
-    _push $tag
+    _push "$tag"
   done
   if [ "$INPUT_PUSH_GIT_TAG" = true ]; then
     _push_git_tag
@@ -112,20 +112,20 @@ _push_image_stages() {
   # push the image itself as a stage (the last one)
   echo -e "\nPushing stage: $stage_number"
   stage_image=$(_get_full_image_name)-stages:$stage_number
-  docker tag $DUMMY_IMAGE_NAME $stage_image
-  docker push $stage_image
+  docker tag "$DUMMY_IMAGE_NAME" "$stage_image"
+  docker push "$stage_image"
 }
 
 _aws() {
   docker run --rm \
-    --env AWS_ACCESS_KEY_ID=$INPUT_USERNAME \
-    --env AWS_SECRET_ACCESS_KEY=$INPUT_PASSWORD \
-    --env AWS_SESSION_TOKEN=$INPUT_SESSION \
-    amazon/aws-cli:2.0.7 --region $aws_region "$@"
+    --env AWS_ACCESS_KEY_ID="$INPUT_USERNAME" \
+    --env AWS_SECRET_ACCESS_KEY="$INPUT_PASSWORD" \
+    --env AWS_SESSION_TOKEN="$INPUT_SESSION" \
+    amazon/aws-cli:2.0.7 --region "$aws_region" "$@"
 }
 
 _login_to_aws_ecr() {
-  _aws ecr get-authorization-token --output text --query 'authorizationData[].authorizationToken' | base64 -d | cut -d: -f2 | docker login --username AWS --password-stdin $INPUT_REGISTRY
+  _aws ecr get-authorization-token --output text --query 'authorizationData[].authorizationToken' | base64 -d | cut -d: -f2 | docker login --username AWS --password-stdin "$INPUT_REGISTRY"
 }
 
 _create_aws_ecr_repos() {
@@ -198,11 +198,11 @@ build_image() {
   set -o pipefail
   set -x
   docker build \
-    $cache_from \
-    --tag $DUMMY_IMAGE_NAME \
-    --file ${INPUT_CONTEXT}/${INPUT_DOCKERFILE} \
-    ${INPUT_BUILD_EXTRA_ARGS} \
-    ${INPUT_CONTEXT} | tee "$BUILD_LOG"
+    "$cache_from" \
+    --tag "$DUMMY_IMAGE_NAME" \
+    --file "${INPUT_CONTEXT}"/"${INPUT_DOCKERFILE}" \
+    "${INPUT_BUILD_EXTRA_ARGS}" \
+    "${INPUT_CONTEXT}" | tee "$BUILD_LOG"
   set +x
 }
 
@@ -211,7 +211,7 @@ tag_image() {
   local tag
   for tag in "${INPUT_IMAGE_TAG[@]}"; do
     echo "Tagging: $tag"
-    _tag $tag
+    _tag "$tag"
   done
 }
 
