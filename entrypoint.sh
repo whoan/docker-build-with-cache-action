@@ -158,6 +158,7 @@ init_variables() {
 
 check_required_input() {
   echo -e "\n[Action Step] Checking required input..."
+  #shellcheck disable=SC2128
   _has_value IMAGE_NAME "${INPUT_IMAGE_NAME}" \
     && _has_value IMAGE_TAG "${INPUT_IMAGE_TAG}" \
     && return
