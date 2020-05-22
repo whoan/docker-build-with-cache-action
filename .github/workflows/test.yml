@@ -36,5 +36,5 @@ jobs:
         username: ${{ github.repository_owner }}
         password: "${{ secrets.GITHUB_TOKEN }}"
         registry: docker.pkg.github.com
-        image_name: ${{ github.repository }}
+        image_name: docker-build-with-cache-action
         push_git_tag: true
