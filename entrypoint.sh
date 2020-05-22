@@ -72,6 +72,7 @@ _get_full_image_name() {
 _tag() {
   local tag
   tag="${1:?You must provide a tag}"
+  echo -e "\nTagging image as $(_get_full_image_name):$tag"
   docker tag $DUMMY_IMAGE_NAME "$(_get_full_image_name):$tag"
 }
 
@@ -101,6 +102,7 @@ _push_image_tags() {
 }
 
 _push_image_stages() {
+  echo -e "\nPushing image stages."
   local stage_number=1
   local stage_image
   for stage in $(_get_stages); do
