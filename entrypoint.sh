@@ -104,7 +104,7 @@ _push_image_tags() {
 }
 
 _push_image_stages() {
-  echo -e "\nPushing image stages."
+  echo -e "\nFound $(_get_stages) stages to push"
   local stage_number=1
   local stage_image
   for stage in $(_get_stages); do
