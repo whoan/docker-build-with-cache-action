@@ -79,6 +79,7 @@ _tag() {
 _push() {
   local tag
   tag="${1:?You must provide a tag}"
+  echo -e "\nPushing image $(_get_full_image_name):$tag"
   docker push "$(_get_full_image_name):$tag"
 }
 
