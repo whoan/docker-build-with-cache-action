@@ -92,6 +92,7 @@ _push_git_tag() {
 }
 
 _push_image_tags() {
+  echo -e "\nPushing image tags"
   local tag
   for tag in "${INPUT_IMAGE_TAG[@]}"; do
     echo "Pushing: $tag"
