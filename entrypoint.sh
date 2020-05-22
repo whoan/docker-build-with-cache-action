@@ -209,8 +209,7 @@ build_image() {
     --file ${INPUT_CONTEXT}/${INPUT_DOCKERFILE} \
     ${INPUT_BUILD_EXTRA_ARGS} \
     ${INPUT_CONTEXT} | tee "$BUILD_LOG"
-  
-  [ "${DEBUG:-false}" != "true" ] && set +x
+  set +x
 }
 
 tag_image() {
