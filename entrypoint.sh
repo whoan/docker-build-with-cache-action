@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[ "${DEBUG:-false}" = "true" ] && set -x
+
 set -e
 
 # helper functions
