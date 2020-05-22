@@ -31,15 +31,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: SHA8
-      id: sha8
-      env:
-        GIT_SHA: ${{ github.sha }}
-      run: ./.github/workflows/sha8.sh
-
     - uses: ./
       with:
         password: "${{ secrets.GITHUB_TOKEN }}"
         registry: docker.pkg.github.com
         image_name: ${{ github.repository }}
-        image_tag: ${{ steps.sha8.outputs.sha8 }}
+        push_git_tag: true
