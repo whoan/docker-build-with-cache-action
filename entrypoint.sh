@@ -70,6 +70,7 @@ _get_full_image_name() {
 _tag() {
   local tag
   tag="${1:?You must provide a tag}"
+  echo "Tag: $(_get_full_image_name):$tag"
   docker tag "$DUMMY_IMAGE_NAME" "$(_get_full_image_name):$tag"
 }
 
@@ -227,7 +228,6 @@ tag_image() {
   echo -e "\n[Action Step] Tagging image..."
   local tag
   for tag in "${INPUT_IMAGE_TAG[@]}"; do
-    echo "Tagging: $tag"
     _tag "$tag"
   done
 }
