@@ -198,10 +198,9 @@ build_image() {
   # build image using cache
   set -o pipefail
   set -x
-  # Disable SC2086 because we actually want word splitting to nothing
   # shellcheck disable=SC2086
   docker build \
-    "$cache_from" \
+    $cache_from \
     --tag "$DUMMY_IMAGE_NAME" \
     --file "${INPUT_CONTEXT}"/"${INPUT_DOCKERFILE}" \
     ${INPUT_BUILD_EXTRA_ARGS} \
