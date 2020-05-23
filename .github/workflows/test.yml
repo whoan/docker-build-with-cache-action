@@ -38,3 +38,4 @@ jobs:
         registry: docker.pkg.github.com
         image_name: docker-build-with-cache-action
         push_git_tag: true
+        push_image_and_stages: on:push
