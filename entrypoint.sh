@@ -79,6 +79,21 @@ _push() {
   docker push "$(_get_full_image_name):$tag"
 }
 
+
+_must_push() {
+  if [ "$INPUT_PUSH_IMAGE_AND_STAGES" = on:push ]; then
+    [ "$GITHUB_EVENT_NAME" = push ]
+    return
+  fi
+
+  if [ "$INPUT_PUSH_IMAGE_AND_STAGES" = on:pull_request ]; then
+    [ "$GITHUB_EVENT_NAME" = pull_request ]
+    return
+  fi
+
+  $INPUT_PUSH_IMAGE_AND_STAGES
+}
+
 _push_git_tag() {
   [[ "$GITHUB_REF" =~ /tags/ ]] || return 0
   local git_tag=${GITHUB_REF##*/tags/}
@@ -219,9 +234,10 @@ tag_image() {
 
 push_image_and_stages() {
   echo -e "\n[Action Step] Pushing image..."
-  if ! $INPUT_PUSH_IMAGE_AND_STAGES; then
+  if ! _must_push; then
     echo "Not pushing" >&2
-    [ "$INPUT_PUSH_IMAGE_AND_STAGES" = false ]
+    # only stop the action on errors of custom commands set in the input variable
+    [ "$INPUT_PUSH_IMAGE_AND_STAGES" = false ] || [[ "$INPUT_PUSH_IMAGE_AND_STAGES" =~ ^on: ]]
     return
   fi
 
