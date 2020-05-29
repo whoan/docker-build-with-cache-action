@@ -128,9 +128,9 @@ Find working minimal examples for the most known registries in [this repo](https
 
 ## Cache is not working?
 
-Be aware of the conditions that can invalidate your cache:
-
-- Be specific with the base images. If you start from an image with the `latest` tag, it may download different versions when the action is triggered, and it will invalidate the cache.
+- Be specific with the base images. e.g.: if you start from an image with the `latest` tag, it may download different versions when the action is triggered, and it will invalidate the cache.
+- If you are using Buildkit, the stages won't be pushed to the registry. This might be supported in a future version.
+- Some docker limitations might cause the cache not to be used correctly. More information [in this SO answer](https://stackoverflow.com/questions/54574821/docker-build-not-using-cache-when-copying-gemfile-while-using-cache-from/56024061#56024061).
 
 ## License
 
