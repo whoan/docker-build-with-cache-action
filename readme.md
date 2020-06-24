@@ -73,6 +73,8 @@ Find working minimal examples for the most known registries in [this repo](https
 
 > [GitHub automatically creates a GITHUB_TOKEN secret to use in your workflow](https://help.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token#about-the-github_token-secret).
 
+> If you push the image to a **public** repository's GitHub Registry, please be aware that it will be impossible to delete it because of GitHub's policy (see [Deleting a package](https://help.github.com/en/packages/publishing-and-managing-packages/deleting-a-package)).
+
 ```yml
 - uses: whoan/docker-build-with-cache-action@v5
   with:
