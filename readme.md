@@ -36,10 +36,10 @@ Built-in support for the most known registries: Docker Hub, AWS ECR, GitHub's re
 
 - **push_image_and_stages**: Test a command before pushing. Use `false` to not push at all (default: `true`).
 
-    This input also supports 2 special values:
+    This input also supports 2 special values, which are useful if your workflow can be triggered by different events:
 
-    - `on:push`: Push only if the action was triggered by a push.
-    - `on:pull_request`: Push only if the action was triggered by a pull_request.
+    - `on:push`: Push only if the workflow was triggered by a push.
+    - `on:pull_request`: Push only if the workflow was triggered by a pull_request.
 
 [branch tip]: https://stackoverflow.com/questions/16080342/what-is-a-branch-tip-in-git
 
