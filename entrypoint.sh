@@ -43,7 +43,7 @@ _set_namespace() {
       NAMESPACE=$GITHUB_REPOSITORY
     elif _is_gcloud_registry; then
       # take project_id from Json Key
-      NAMESPACE=$(echo "${INPUT_PASSWORD}" | sed -rn 's@.+project_id" *: *"([^"]+).+@\1@p' 2> /dev/null)
+      NAMESPACE=$(jq -r '.project_id' <<< "$INPUT_PASSWORD" 2> /dev/null)
       [ "$NAMESPACE" ] || return 1
     fi
     # aws-ecr does not need a namespace
