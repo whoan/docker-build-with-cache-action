@@ -21,7 +21,7 @@ _is_github_registry() {
 }
 
 _is_gcloud_registry() {
-  [ "$INPUT_REGISTRY" = gcr.io ]
+  [[ "$INPUT_REGISTRY" =~ ^(.+\.)?gcr\.io$ ]]
 }
 
 _is_aws_ecr() {
