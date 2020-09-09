@@ -32,7 +32,7 @@ Built-in support for the most known registries: Docker Hub, AWS ECR, GitHub's re
 
 - **pull_image_and_stages**: Set to `false` to avoid pulling from the registry or to build from scratch (default: `true`).
 
-- **stages_image_name**: Use a custom name for the stages. Useful if using a job matrix (default: `${image_name}-stages)`.
+- **stages_image_name**: Set custom name for stages. Useful if using a job matrix (default: `$image_name-stages)`.
 
 - **build_extra_args**: Extra params for `docker build` (e.g. `"--build-arg=hello=world"`).
 
