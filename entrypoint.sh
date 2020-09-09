@@ -63,8 +63,20 @@ _get_stages() {
     sed -rn 's/ *-*> (.+)/\1/p'
 }
 
+_get_image_namespace() {
+  echo ${INPUT_REGISTRY:+$INPUT_REGISTRY/}${NAMESPACE:+$NAMESPACE/}
+}
+
 _get_full_image_name() {
-  echo ${INPUT_REGISTRY:+$INPUT_REGISTRY/}${NAMESPACE:+$NAMESPACE/}"${INPUT_IMAGE_NAME}"
+  echo "$(_get_image_namespace)${INPUT_IMAGE_NAME}"
+}
+
+_get_stages_image_name() {
+  echo "${INPUT_STAGES_IMAGE_NAME:-${INPUT_IMAGE_NAME}-stages}"
+}
+
+_get_full_stages_image_name() {
+  echo "$(_get_image_namespace)$(_get_stages_image_name)"
 }
 
 _tag() {
@@ -119,7 +131,7 @@ _push_image_stages() {
   local stage_image
   for stage in $(_get_stages); do
     echo -e "\nPushing stage: $stage_number"
-    stage_image=$(_get_full_image_name)-stages:$stage_number
+    stage_image=$(_get_full_stages_image_name):$stage_number
     docker tag "$stage" "$stage_image"
     docker push "$stage_image"
     stage_number=$(( stage_number+1 ))
@@ -127,7 +139,7 @@ _push_image_stages() {
 
   # push the image itself as a stage (the last one)
   echo -e "\nPushing stage: $stage_number"
-  stage_image=$(_get_full_image_name)-stages:$stage_number
+  stage_image=$(_get_full_stages_image_name):$stage_number
   docker tag "$DUMMY_IMAGE_NAME" "$stage_image"
   docker push "$stage_image"
 }
@@ -146,7 +158,7 @@ _login_to_aws_ecr() {
 
 _create_aws_ecr_repos() {
   _aws ecr create-repository --repository-name "$INPUT_IMAGE_NAME" 2>&1 | grep -v RepositoryAlreadyExistsException
-  _aws ecr create-repository --repository-name "$INPUT_IMAGE_NAME"-stages 2>&1 | grep -v RepositoryAlreadyExistsException
+  _aws ecr create-repository --repository-name "$(_get_stages_image_name)" 2>&1 | grep -v RepositoryAlreadyExistsException
   return 0
 }
 
@@ -198,7 +210,7 @@ pull_cached_stages() {
     return
   fi
   echo -e "\n[Action Step] Pulling image..."
-  docker pull --all-tags "$(_get_full_image_name)"-stages | tee "$PULL_STAGES_LOG" || true
+  docker pull --all-tags "$(_get_full_stages_image_name)" | tee "$PULL_STAGES_LOG" || true
 }
 
 build_image() {
@@ -207,7 +219,7 @@ build_image() {
 
   # create param to use (multiple) --cache-from options
   if [ "$max_stage" ]; then
-    cache_from=$(eval "echo --cache-from=$(_get_full_image_name)-stages:{1..$max_stage}")
+    cache_from=$(eval "echo --cache-from=$(_get_full_stages_image_name):{1..$max_stage}")
     echo "Use cache: $cache_from"
   fi
 

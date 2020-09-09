@@ -35,6 +35,9 @@ inputs:
     description: "(Optional) Test any command before pushing. Use false to avoid pushing to registry (default: true)"
     required: false
     default: true
+  stages_image_name:
+    description: "(Optional) Use a custom name for the stages. Useful if using a job matrix (default: ${image_name}-stages)"
+    required: false
   push_git_tag:
     description: "(Optional) In addition to `image_tag` value, you can also push current git tag (default: false)"
     required: false
