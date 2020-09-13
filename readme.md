@@ -89,6 +89,8 @@ Find working minimal examples for the most known registries in [this repo](https
     username: whoan
     password: "${{ secrets.GITHUB_TOKEN }}"
     registry: docker.pkg.github.com
+    #or
+    #registry: ghcr.io
     image_name: hello-world
 ```
 
