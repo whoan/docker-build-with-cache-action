@@ -16,8 +16,12 @@ _is_docker_hub() {
   [ -z "$INPUT_REGISTRY" ] || [[ "$INPUT_REGISTRY" =~ \.docker\.(com|io)(/|$) ]]
 }
 
-_is_github_registry() {
+_is_old_github_registry() {
   [ "$INPUT_REGISTRY" = docker.pkg.github.com ]
+}
+
+_is_new_github_registry() {
+  [ "$INPUT_REGISTRY" = ghcr.io ]
 }
 
 _is_gcloud_registry() {
@@ -37,9 +41,9 @@ _image_name_contains_namespace() {
 
 _set_namespace() {
   if ! _image_name_contains_namespace; then
-    if _is_docker_hub; then
+    if _is_docker_hub || _is_new_github_registry; then
       NAMESPACE=$INPUT_USERNAME
-    elif _is_github_registry; then
+    elif _is_old_github_registry; then
       NAMESPACE=$GITHUB_REPOSITORY
     elif _is_gcloud_registry; then
       # take project_id from Json Key
