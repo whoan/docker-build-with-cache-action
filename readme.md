@@ -83,6 +83,8 @@ Find working minimal examples for the most known registries in [this repo](https
 
 > If you push the image to a **public** repository's GitHub Registry, please be aware that it will be impossible to delete it because of GitHub's policy (see [Deleting a package](https://help.github.com/en/packages/publishing-and-managing-packages/deleting-a-package)).
 
+> If you are going to use the new GitHub Registry (ghcr.io), be sure to use a Personal Access Token (as the password) with "write:packages" and "read:packages" scopes. More info [here](https://docs.github.com/en/packages/getting-started-with-github-container-registry/migrating-to-github-container-registry-for-docker-images#migrating-a-docker-image-using-the-docker-cli).
+
 ```yml
 - uses: whoan/docker-build-with-cache-action@v5
   with:
