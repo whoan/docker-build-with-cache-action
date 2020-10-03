@@ -199,6 +199,11 @@ check_required_input() {
 
 login_to_registry() {
   echo -e "\n[Action Step] Log in to registry..."
+  if [ -z "$INPUT_USERNAME" ] && _is_aws_ecr; then
+    INPUT_USERNAME=$AWS_ACCESS_KEY_ID
+    INPUT_PASSWORD=$AWS_SECRET_ACCESS_KEY
+  fi
+
   if _has_value USERNAME "${INPUT_USERNAME}" && _has_value PASSWORD "${INPUT_PASSWORD}"; then
     _docker_login && return 0
     echo "Could not log in (please check credentials)" >&2
