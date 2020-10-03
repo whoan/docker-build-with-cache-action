@@ -81,7 +81,6 @@ Find working minimal examples for the most known registries in [this repo](https
 
 > [GitHub automatically creates a GITHUB_TOKEN secret to use in your workflow](https://help.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token#about-the-github_token-secret). If you are going to use the new GitHub Registry (ghcr.io), be sure to use a Personal Access Token (as the password) with "write:packages" and "read:packages" scopes. More info [here](https://docs.github.com/en/packages/getting-started-with-github-container-registry/migrating-to-github-container-registry-for-docker-images#migrating-a-docker-image-using-the-docker-cli).
 
-
 > If you push the image to a **public** repository's GitHub Registry, please be aware that it will be impossible to delete it because of GitHub's policy (see [Deleting a package](https://help.github.com/en/packages/publishing-and-managing-packages/deleting-a-package)).
 
 ```yml
@@ -115,8 +114,8 @@ Find working minimal examples for the most known registries in [this repo](https
 ```yml
 - uses: whoan/docker-build-with-cache-action@v5
   with:
-    username: "${{ secrets.AWS_ACCESS_KEY_ID }}"
-    password: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+    username: "${{ secrets.AWS_ACCESS_KEY_ID }}"  # no need to provide it if you already logged in with aws-actions/configure-aws-credentials
+    password: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"  # no need to provide it if you already logged in with aws-actions/configure-aws-credentials
     session:  "${{ secrets.AWS_SESSION_TOKEN }}"  # if you need role assumption
     registry: 861729690598.dkr.ecr.us-west-1.amazonaws.com
     image_name: hello-world
