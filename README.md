@@ -12,21 +12,22 @@ Built-in support for the most known registries: Docker Hub, AWS ECR, GitHub's re
 
 - **image_name**: Image name (e.g. *node*).
 
+or
+
+- **compose_file**: path to Docker Compose file. You will need to configure this action multiple times if you have a compose file which uses more than one registry.
+
 ### Optional
+
+- **image_tag**: Tag(s) of the image. Allows multiple comma-separated tags (e.g. `one,another`) (default: `latest`).  
+  If you set **compose_file** and the image(s) already has/have a tag, this is ignored.
+
+- **registry**: Docker registry (default: *Docker Hub's registry*).
 
 - **username**: Docker registry's user (needed to push images, or to pull from a private repository).
 
 - **password**: Docker registry's password (needed to push images, or to pull from a private repository).
 
 - **session**: Extra auth parameters. For AWS ECR, means setting AWS_SESSION_TOKEN environment variable.
-
-- **registry**: Docker registry (default: *Docker Hub's registry*).
-
-- **image_tag**: Tag(s) of the image. Allows multiple comma-separated tags (e.g. `one,another`) (default: `latest`).
-
-- **context**: Docker context (default: `./`).
-
-- **dockerfile**: Dockerfile filename path (default: `"$context"/Dockerfile`).
 
 - **push_git_tag**: In addition to `image_tag`, you can also push the git tag in your [branch tip][branch tip] (default: `false`).
 
@@ -44,6 +45,14 @@ Built-in support for the most known registries: Docker Hub, AWS ECR, GitHub's re
     - `on:pull_request`: Push only if the workflow was triggered by a pull_request.
 
 [branch tip]: https://stackoverflow.com/questions/16080342/what-is-a-branch-tip-in-git
+
+#### Ignored if `compose_file` is set
+
+- **image_name**
+
+- **context**: Docker context (default: `./`).
+
+- **dockerfile**: Dockerfile filename path (default: `"$context"/Dockerfile`).
 
 ## Outputs
 

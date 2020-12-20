@@ -6,7 +6,10 @@ inputs:
 
   image_name:
     description: Name of the image to build
-    required: true
+    required: false
+  compose_file:
+    description: Path to compose file
+    required: false
   username:
     description: (Optional) Docker's registry user (needed to push image to repository, or to pull from private repository)
     required: false
