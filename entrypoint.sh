@@ -14,6 +14,11 @@ build_from_compose_file() {
   _parse_yaml "$INPUT_COMPOSE_FILE" > "$parsed_yaml"
   _gather_images
 
+  if (( ${#images[@]} == 0 )); then
+    echo "No images detected for registry (${INPUT_REGISTRY:-DockerHub})" >&2
+    return 1
+  fi
+
   for image in "${images[@]}"; do
     _set_variables "$image"
     export INPUT_IMAGE_NAME
