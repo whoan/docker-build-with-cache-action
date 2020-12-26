@@ -163,6 +163,10 @@ Find working minimal examples for the most known registries in [this repo](https
 - If you are using Buildkit, the stages won't be pushed to the registry. This might be supported in a future version.
 - Some docker limitations might cause the cache not to be used correctly. More information [in this SO answer](https://stackoverflow.com/questions/54574821/docker-build-not-using-cache-when-copying-gemfile-while-using-cache-from/56024061#56024061).
 
+## Tests
+
+The tests for this action are run in a [separate repo](https://github.com/whoan/hello-world) as I need to set credentials for each registry with GitHub secrets and doing so in this repo is not practical.
+
 ## License
 
 [MIT](https://github.com/whoan/docker-build-with-cache-action/blob/master/LICENSE)
