@@ -130,6 +130,16 @@ Find working minimal examples for the most known registries in [this repo](https
     image_name: hello-world
 ```
 
+### From a compose file
+
+```yml
+- uses: whoan/docker-build-with-cache-action@v5
+  with:
+    username: whoan
+    password: "${{ secrets.DOCKER_HUB_PASSWORD }}"
+    compose_file: docker-compose.yml
+```
+
 ### Example with more options
 
 ```yml
