@@ -132,11 +132,22 @@ Find working minimal examples for the most known registries in [this repo](https
 
 ### From a compose file
 
+> Images to build are detected `grep`ping the registry (if provided) in the compose file. If no registry is provided, DockerHub is assumed and images with format `<username>/<image>[:<tag>]` are `grep`ped.
+
 ```yml
 - uses: whoan/docker-build-with-cache-action@v5
   with:
     username: whoan
     password: "${{ secrets.DOCKER_HUB_PASSWORD }}"
+    compose_file: docker-compose.yml
+```
+
+```yml
+- uses: whoan/docker-build-with-cache-action@v5
+  with:
+    username: whoan
+    password: "${{ secrets.GITHUB_TOKEN }}"
+    registry: docker.pkg.github.com
     compose_file: docker-compose.yml
 ```
 
