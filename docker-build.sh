@@ -156,7 +156,7 @@ _aws() {
     --env AWS_ACCESS_KEY_ID="$INPUT_USERNAME" \
     --env AWS_SECRET_ACCESS_KEY="$INPUT_PASSWORD" \
     --env AWS_SESSION_TOKEN="$INPUT_SESSION" \
-    amazon/aws-cli:2.0.7 --region "$(_get_aws_region)" "$@"
+    amazon/aws-cli:2.1.14 --region "$(_get_aws_region)" "$@"
 }
 
 _login_to_aws_ecr() {
