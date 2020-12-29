@@ -29,10 +29,13 @@ _is_gcloud_registry() {
 }
 
 _is_aws_ecr() {
-  [[ $INPUT_REGISTRY =~ ^.+\.dkr\.ecr\.([a-z0-9-]+)\.amazonaws\.com$ ]]
-  is_aws_ecr=$?
-  aws_region=${BASH_REMATCH[1]}
-  return $is_aws_ecr
+  [[ "$INPUT_REGISTRY" =~ ^.+\.dkr\.ecr\.([a-z0-9-]+)\.amazonaws\.com$ ]]
+}
+
+_get_aws_region() {
+  # tied to _is_aws_ecr implementation
+  _is_aws_ecr && echo "${BASH_REMATCH[1]}" && return
+  echo "Could not get AWS region" >&2
 }
 
 _image_name_contains_namespace() {
@@ -153,7 +156,7 @@ _aws() {
     --env AWS_ACCESS_KEY_ID="$INPUT_USERNAME" \
     --env AWS_SECRET_ACCESS_KEY="$INPUT_PASSWORD" \
     --env AWS_SESSION_TOKEN="$INPUT_SESSION" \
-    amazon/aws-cli:2.0.7 --region "$aws_region" "$@"
+    amazon/aws-cli:2.0.7 --region "$(_get_aws_region)" "$@"
 }
 
 _login_to_aws_ecr() {
