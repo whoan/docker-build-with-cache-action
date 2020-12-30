@@ -29,10 +29,15 @@ _is_gcloud_registry() {
 }
 
 _is_aws_ecr() {
-  [[ "$INPUT_REGISTRY" =~ ^.+\.dkr\.ecr\.([a-z0-9-]+)\.amazonaws\.com$ ]]
+  [[ "$INPUT_REGISTRY" =~ ^.+\.dkr\.ecr\.([a-z0-9-]+)\.amazonaws\.com$ ]] || _is_aws_ecr_public
+}
+
+_is_aws_ecr_public() {
+  [[ "$INPUT_REGISTRY" =~ ^public.ecr.aws$ ]]
 }
 
 _get_aws_region() {
+  _is_aws_ecr_public && echo "us-east-1" && return
   # tied to _is_aws_ecr implementation
   _is_aws_ecr && echo "${BASH_REMATCH[1]}" && return
   echo "Could not get AWS region" >&2
@@ -52,8 +57,10 @@ _set_namespace() {
       # take project_id from Json Key
       NAMESPACE=$(echo "${INPUT_PASSWORD}" | sed -rn 's@.+project_id" *: *"([^"]+).+@\1@p' 2> /dev/null)
       [ "$NAMESPACE" ] || return 1
+    elif _is_aws_ecr_public; then
+      NAMESPACE=$(_aws_get_public_ecr_registry_name)
     fi
-    # aws-ecr does not need a namespace
+    # aws-ecr (private) does not need a namespace
   fi
   # set namespace to all lower, capital letters are not supported
   NAMESPACE=${NAMESPACE,,}
@@ -159,13 +166,23 @@ _aws() {
     amazon/aws-cli:2.1.14 --region "$(_get_aws_region)" "$@"
 }
 
+_aws_get_public_ecr_registry_name() {
+  _aws ecr-public describe-registries --output=text --query 'registries[0].aliases[0].name'
+}
+
 _login_to_aws_ecr() {
-  _aws ecr get-authorization-token --output text --query 'authorizationData[].authorizationToken' | base64 -d | cut -d: -f2 | docker login --username AWS --password-stdin "$INPUT_REGISTRY"
+  local array="[]"
+  if _is_aws_ecr_public; then
+    local ecr_public_suffix=-public
+    array=""
+  fi
+  _aws ecr${ecr_public_suffix} get-authorization-token --output text --query "authorizationData${array}.authorizationToken" |
+    base64 -d | cut -d: -f2 | docker login --username AWS --password-stdin "$INPUT_REGISTRY"
 }
 
 _create_aws_ecr_repos() {
-  _aws ecr create-repository --repository-name "$INPUT_IMAGE_NAME" 2>&1 | grep -v RepositoryAlreadyExistsException
-  _aws ecr create-repository --repository-name "$(_get_stages_image_name)" 2>&1 | grep -v RepositoryAlreadyExistsException
+  _aws ecr${ecr_public_suffix} create-repository --repository-name "$INPUT_IMAGE_NAME" 2>&1 | grep -v RepositoryAlreadyExistsException
+  _aws ecr${ecr_public_suffix} create-repository --repository-name "$(_get_stages_image_name)" 2>&1 | grep -v RepositoryAlreadyExistsException
   return 0
 }
 
