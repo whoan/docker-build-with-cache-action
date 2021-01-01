@@ -29,7 +29,11 @@ _is_gcloud_registry() {
 }
 
 _is_aws_ecr() {
-  [[ "$INPUT_REGISTRY" =~ ^.+\.dkr\.ecr\.([a-z0-9-]+)\.amazonaws\.com$ ]] || _is_aws_ecr_public
+  _is_aws_ecr_private || _is_aws_ecr_public
+}
+
+_is_aws_ecr_private() {
+  [[ "$INPUT_REGISTRY" =~ ^.+\.dkr\.ecr\.([a-z0-9-]+)\.amazonaws\.com$ ]]
 }
 
 _is_aws_ecr_public() {
@@ -38,8 +42,8 @@ _is_aws_ecr_public() {
 
 _get_aws_region() {
   _is_aws_ecr_public && echo "us-east-1" && return
-  # tied to _is_aws_ecr implementation
-  _is_aws_ecr && echo "${BASH_REMATCH[1]}" && return
+  # tied to _is_aws_ecr_private implementation
+  _is_aws_ecr_private && echo "${BASH_REMATCH[1]}" && return
   echo "Could not get AWS region" >&2
 }
 
