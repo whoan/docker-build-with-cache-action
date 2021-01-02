@@ -4,7 +4,12 @@ This action builds your docker image and caches the stages (supports multi-stage
 
 By default, it pushes the image with all the stages to a registry (needs username and password), but you can disable this feature by setting `push_image_and_stages` to `false`.
 
-Built-in support for the most known registries: Docker Hub, AWS ECR, GitHub's registry, and Google Cloud.
+Built-in support for the most known registries:
+
+- Docker Hub
+- AWS ECR (private and public)
+- GitHub's (old and new registry)
+- Google Cloud's
 
 ## Inputs
 

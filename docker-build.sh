@@ -29,10 +29,22 @@ _is_gcloud_registry() {
 }
 
 _is_aws_ecr() {
-  [[ $INPUT_REGISTRY =~ ^.+\.dkr\.ecr\.([a-z0-9-]+)\.amazonaws\.com$ ]]
-  is_aws_ecr=$?
-  aws_region=${BASH_REMATCH[1]}
-  return $is_aws_ecr
+  _is_aws_ecr_private || _is_aws_ecr_public
+}
+
+_is_aws_ecr_private() {
+  [[ "$INPUT_REGISTRY" =~ ^.+\.dkr\.ecr\.([a-z0-9-]+)\.amazonaws\.com$ ]]
+}
+
+_is_aws_ecr_public() {
+  [[ "$INPUT_REGISTRY" =~ ^public.ecr.aws$ ]]
+}
+
+_get_aws_region() {
+  _is_aws_ecr_public && echo "us-east-1" && return
+  # tied to _is_aws_ecr_private implementation
+  _is_aws_ecr_private && echo "${BASH_REMATCH[1]}" && return
+  echo "Could not get AWS region" >&2
 }
 
 _image_name_contains_namespace() {
@@ -49,17 +61,17 @@ _set_namespace() {
       # take project_id from Json Key
       NAMESPACE=$(echo "${INPUT_PASSWORD}" | sed -rn 's@.+project_id" *: *"([^"]+).+@\1@p' 2> /dev/null)
       [ "$NAMESPACE" ] || return 1
+    elif _is_aws_ecr_public; then
+      NAMESPACE=$(_aws_get_public_ecr_registry_name)
     fi
-    # aws-ecr does not need a namespace
+    # aws-ecr (private) does not need a namespace
   fi
   # set namespace to all lower, capital letters are not supported
   NAMESPACE=${NAMESPACE,,}
 }
 
 _get_max_stage_number() {
-  sed -nr 's/^([0-9]+): Pulling from.+/\1/p' "$PULL_STAGES_LOG" |
-    sort -n |
-    tail -n 1
+  echo "${tags[-1]}"
 }
 
 _get_stages() {
@@ -153,16 +165,32 @@ _aws() {
     --env AWS_ACCESS_KEY_ID="$INPUT_USERNAME" \
     --env AWS_SECRET_ACCESS_KEY="$INPUT_PASSWORD" \
     --env AWS_SESSION_TOKEN="$INPUT_SESSION" \
-    amazon/aws-cli:2.0.7 --region "$aws_region" "$@"
+    amazon/aws-cli:2.1.14 --region "$(_get_aws_region)" "$@"
+}
+
+_aws_get_public_ecr_registry_name() {
+  _aws ecr-public describe-registries --output=text --query 'registries[0].aliases[0].name'
+}
+
+_aws_get_image_tags() {
+  mapfile -t tags < <(_aws ecr-public describe-image-tags --repository-name "$INPUT_IMAGE_NAME"-stages | jq ".imageTagDetails[].imageTag")
+  tags=( "${tags[@]#\"}" )
+  tags=( "${tags[@]%\"}" )
 }
 
 _login_to_aws_ecr() {
-  _aws ecr get-authorization-token --output text --query 'authorizationData[].authorizationToken' | base64 -d | cut -d: -f2 | docker login --username AWS --password-stdin "$INPUT_REGISTRY"
+  local array="[]"
+  if _is_aws_ecr_public; then
+    local ecr_public_suffix=-public
+    array=""
+  fi
+  _aws ecr${ecr_public_suffix} get-authorization-token --output text --query "authorizationData${array}.authorizationToken" |
+    base64 -d | cut -d: -f2 | docker login --username AWS --password-stdin "$INPUT_REGISTRY"
 }
 
 _create_aws_ecr_repos() {
-  _aws ecr create-repository --repository-name "$INPUT_IMAGE_NAME" 2>&1 | grep -v RepositoryAlreadyExistsException
-  _aws ecr create-repository --repository-name "$(_get_stages_image_name)" 2>&1 | grep -v RepositoryAlreadyExistsException
+  _aws ecr${ecr_public_suffix} create-repository --repository-name "$INPUT_IMAGE_NAME" 2>&1 | grep -v RepositoryAlreadyExistsException
+  _aws ecr${ecr_public_suffix} create-repository --repository-name "$(_get_stages_image_name)" 2>&1 | grep -v RepositoryAlreadyExistsException
   return 0
 }
 
@@ -178,7 +206,6 @@ _docker_login() {
 # action steps
 init_variables() {
   DUMMY_IMAGE_NAME=my_awesome_image
-  PULL_STAGES_LOG=pull-stages-output.log
   BUILD_LOG=build-output.log
   # split tags (to allow multiple comma-separated tags)
   IFS=, read -ra INPUT_IMAGE_TAG <<< "$INPUT_IMAGE_TAG"
@@ -219,7 +246,18 @@ pull_cached_stages() {
     return
   fi
   echo -e "\n[Action Step] Pulling image..."
-  docker pull --all-tags "$(_get_full_stages_image_name)" | tee "$PULL_STAGES_LOG" || true
+
+  if _is_aws_ecr_public; then
+    _aws_get_image_tags
+    local tag
+    for tag in "${tags[@]}"; do
+      docker pull "$(_get_full_stages_image_name)":"$tag" || true
+    done
+  else
+    local PULL_STAGES_LOG=pull-stages-output.log
+    docker pull --all-tags "$(_get_full_stages_image_name)" | tee "$PULL_STAGES_LOG" || true
+    mapfile -t tags < <(sed -nr 's/^([0-9]+): Pulling from.+/\1/p' "$PULL_STAGES_LOG" | sort -n)
+  fi
 }
 
 build_image() {
