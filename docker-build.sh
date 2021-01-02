@@ -71,9 +71,7 @@ _set_namespace() {
 }
 
 _get_max_stage_number() {
-  sed -nr 's/^([0-9]+): Pulling from.+/\1/p' "$PULL_STAGES_LOG" |
-    sort -n |
-    tail -n 1
+  echo "${tags[-1]}"
 }
 
 _get_stages() {
@@ -174,6 +172,12 @@ _aws_get_public_ecr_registry_name() {
   _aws ecr-public describe-registries --output=text --query 'registries[0].aliases[0].name'
 }
 
+_aws_get_image_tags() {
+  mapfile -t tags < <(_aws ecr-public describe-image-tags --repository-name "$INPUT_IMAGE_NAME"-stages | jq ".imageTagDetails[].imageTag")
+  tags=( "${tags[@]#\"}" )
+  tags=( "${tags[@]%\"}" )
+}
+
 _login_to_aws_ecr() {
   local array="[]"
   if _is_aws_ecr_public; then
@@ -202,7 +206,6 @@ _docker_login() {
 # action steps
 init_variables() {
   DUMMY_IMAGE_NAME=my_awesome_image
-  PULL_STAGES_LOG=pull-stages-output.log
   BUILD_LOG=build-output.log
   # split tags (to allow multiple comma-separated tags)
   IFS=, read -ra INPUT_IMAGE_TAG <<< "$INPUT_IMAGE_TAG"
@@ -243,7 +246,18 @@ pull_cached_stages() {
     return
   fi
   echo -e "\n[Action Step] Pulling image..."
-  docker pull --all-tags "$(_get_full_stages_image_name)" | tee "$PULL_STAGES_LOG" || true
+
+  if _is_aws_ecr_public; then
+    _aws_get_image_tags
+    local tag
+    for tag in "${tags[@]}"; do
+      docker pull "$(_get_full_stages_image_name)":"$tag" || true
+    done
+  else
+    local PULL_STAGES_LOG=pull-stages-output.log
+    docker pull --all-tags "$(_get_full_stages_image_name)" | tee "$PULL_STAGES_LOG" || true
+    mapfile -t tags < <(sed -nr 's/^([0-9]+): Pulling from.+/\1/p' "$PULL_STAGES_LOG" | sort -n)
+  fi
 }
 
 build_image() {
