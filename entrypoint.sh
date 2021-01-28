@@ -47,7 +47,7 @@ _parse_yaml() {
         vname[indent] = $2;
         for (i in vname) {if (i > indent) {delete vname[i]}}
         if (length($3) > 0) {
-           vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
+           vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("@")}
            printf("%s%s%s=\"%s\"\n", "'"$prefix"'",vn, $2, $3);
         }
      }'
@@ -57,9 +57,9 @@ _gather_images() {
   images=()
   if [ -z "$INPUT_REGISTRY" ]; then
     # docker hub registry
-    mapfile -t images < <(grep -Po "(?<=_image=\")${INPUT_USERNAME}/[^\"]+" "$parsed_yaml")
+    mapfile -t images < <(grep -Po "(?<=@image=\")${INPUT_USERNAME}/[^\"]+" "$parsed_yaml")
   else
-    mapfile -t images < <(grep -Po "(?<=_image=\")${INPUT_REGISTRY}/[^\"]+" "$parsed_yaml")
+    mapfile -t images < <(grep -Po "(?<=@image=\")${INPUT_REGISTRY}/[^\"]+" "$parsed_yaml")
   fi
 }
 
@@ -92,19 +92,19 @@ _set_variables() {
 _get_service_name_by_image_name() {
   local image_name
   image_name="${1:?I need an image_name}"
-  grep -Po "(?<=services_)[^_]+(?=.+$image_name.+)" "$parsed_yaml"
+  grep -Po "(?<=services@)[^@]+(?=@image=.*\W${image_name}\W)" "$parsed_yaml"
 }
 
 _get_context_by_service_name() {
   local service_name
   service_name="${1:?I need a service name}"
-  grep -Po "(?<=services_${service_name}_build_context=\")[^\"]+" "$parsed_yaml"
+  grep -Po "((?<=services@${service_name}@build@context=\")|(?<=services@${service_name}@build=\"))[^\"]+" "$parsed_yaml"
 }
 
 _get_dockerfile_by_service_name() {
   local service_name
   service_name="${1:?I need a service name}"
-  grep -Po "(?<=services_${service_name}_build_dockerfile=\")[^\"]+" "$parsed_yaml"
+  grep -Po "(?<=services@${service_name}@build@dockerfile=\")[^\"]+" "$parsed_yaml" || echo Dockerfile
 }
 
 build_from_compose_file
