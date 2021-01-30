@@ -71,7 +71,7 @@ _set_namespace() {
 }
 
 _get_max_stage_number() {
-  echo "${tags[-1]}"
+  (( ${#tags[@]} == 0 )) || echo "${tags[-1]}"
 }
 
 _get_stages() {
