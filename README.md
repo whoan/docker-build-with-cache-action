@@ -21,6 +21,8 @@ or
 
 - **compose_file**: path to Docker Compose file. You will need to configure this action multiple times if you have a compose file which uses more than one registry.
 
+> :star2: New in v5.10: Now you can use overrides for your compose file(s) like this: `docker-compose.yml > docker-compose.override.yml > docker-compose.override2.yml`
+
 ### Optional
 
 - **image_tag**: Tag(s) of the image. Allows multiple comma-separated tags (e.g. `one,another`) (default: `latest`).  
