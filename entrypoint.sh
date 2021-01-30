@@ -94,7 +94,8 @@ _set_variables() {
 _get_service_name_by_image_name() {
   local image_name
   image_name="${1:?I need an image_name}"
-  grep -Po "(?<=services@)[^@]+(?=@image=.*\W${image_name}\W)" "$parsed_yaml" ||
+  # regex info: https://github.com/distribution/distribution/blob/main/reference/regexp.go
+  grep -Po "(?<=services@)[^@]+(?=@image=\"${image_name}(?![[:alnum:]-._]))" "$parsed_yaml" ||
     { echo "Failed to get service name" >&2 && false; }
 }
 
