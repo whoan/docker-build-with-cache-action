@@ -161,6 +161,16 @@ Find working minimal examples for the most known registries in [this repo](https
     compose_file: docker-compose.yml
 ```
 
+With a compose file override:
+
+```yml
+- uses: whoan/docker-build-with-cache-action@v5
+  with:
+    username: whoan
+    password: "${{ secrets.DOCKER_HUB_PASSWORD }}"
+    compose_file: docker-compose.yml > docker-compose.override.yml
+```
+
 ### Example with more options
 
 ```yml
