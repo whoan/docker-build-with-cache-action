@@ -20,12 +20,14 @@ build_from_compose_file() {
   fi
 
   for image in "${images[@]}"; do
+    echo -e "\n[Compose file] Building image: $image"
     _set_variables "$image"
     export INPUT_IMAGE_NAME
     export INPUT_IMAGE_TAG
     export INPUT_CONTEXT
     export INPUT_DOCKERFILE
     /docker-build.sh
+    echo -e "\n[Compose file] $image - DONE\n"
   done
 }
 
@@ -92,13 +94,15 @@ _set_variables() {
 _get_service_name_by_image_name() {
   local image_name
   image_name="${1:?I need an image_name}"
-  grep -Po "(?<=services@)[^@]+(?=@image=.*\W${image_name}\W)" "$parsed_yaml"
+  grep -Po "(?<=services@)[^@]+(?=@image=.*\W${image_name}\W)" "$parsed_yaml" ||
+    { echo "Failed to get service name" >&2 && false; }
 }
 
 _get_context_by_service_name() {
   local service_name
   service_name="${1:?I need a service name}"
-  grep -Po "((?<=services@${service_name}@build@context=\")|(?<=services@${service_name}@build=\"))[^\"]+" "$parsed_yaml"
+  grep -Po "((?<=services@${service_name}@build@context=\")|(?<=services@${service_name}@build=\"))[^\"]+" "$parsed_yaml" ||
+    { echo "Failed to get context" >&2 && false; }
 }
 
 _get_dockerfile_by_service_name() {

@@ -257,6 +257,9 @@ pull_cached_stages() {
     local PULL_STAGES_LOG=pull-stages-output.log
     docker pull --all-tags "$(_get_full_stages_image_name)" | tee "$PULL_STAGES_LOG" || true
     mapfile -t tags < <(sed -nr 's/^([0-9]+): Pulling from.+/\1/p' "$PULL_STAGES_LOG" | sort -n)
+    if (( ${#tags[@]} == 0 )); then
+      echo "Expected error ^ if this is the first time you build the image" >&2
+    fi
   fi
 }
 
@@ -267,7 +270,6 @@ build_image() {
   # create param to use (multiple) --cache-from options
   if [ "$max_stage" ]; then
     cache_from=$(eval "echo --cache-from=$(_get_full_stages_image_name):{1..$max_stage}")
-    echo "Use cache: $cache_from"
   fi
 
   # build image using cache
