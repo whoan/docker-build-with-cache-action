@@ -8,10 +8,12 @@ if [ -z "$INPUT_COMPOSE_FILE" ]; then
   exit
 fi
 
+parsed_yaml=/tmp/parsed-yaml.txt
+original_INPUT_IMAGE_TAG=$INPUT_IMAGE_TAG
+
 build_from_compose_file() {
-  original_INPUT_IMAGE_TAG=$INPUT_IMAGE_TAG
-  parsed_yaml=/tmp/parsed-yaml.txt
-  _parse_yaml "$INPUT_COMPOSE_FILE" > "$parsed_yaml"
+   echo -e "\nBuilding from Compose file(s)"
+  _merge_yamls
   _gather_images
 
   if (( ${#images[@]} == 0 )); then
@@ -28,6 +30,27 @@ build_from_compose_file() {
     export INPUT_DOCKERFILE
     /docker-build.sh
     echo -e "\n[Compose file] $image - DONE\n"
+  done
+}
+
+# shellcheck disable=SC2086
+_merge_yamls() {
+  local yamls=()
+  mapfile -d ">" -t yamls < <(echo -n "$INPUT_COMPOSE_FILE")
+
+  touch "$parsed_yaml"
+  local yaml
+  for yaml in "${yamls[@]}"; do
+    while read -r line; do
+      if [[ $line =~ ^(services[^=]+)= ]]; then
+        local fragment=${BASH_REMATCH[1]}
+        if grep -q "$fragment" "$parsed_yaml"; then
+          echo "Overriding: ${fragment//@/ > }"
+          sed -i "/$fragment/d" "$parsed_yaml"
+        fi
+        echo "$line" >> "$parsed_yaml"
+      fi
+    done < <(_parse_yaml $yaml)
   done
 }
 

@@ -21,6 +21,9 @@ or
 
 - **compose_file**: path to Docker Compose file. You will need to configure this action multiple times if you have a compose file which uses more than one registry.
 
+> :star2: New in v5.10.0: Now you can use [overrides](https://docs.docker.com/compose/extends/#multiple-compose-files) for your compose file(s) like this:  
+  `docker-compose.yml > docker-compose.override.yml > docker-compose.override2.yml`
+
 ### Optional
 
 - **image_tag**: Tag(s) of the image. Allows multiple comma-separated tags (e.g. `one,another`) (default: `latest`).  
@@ -157,6 +160,16 @@ Find working minimal examples for the most known registries in [this repo](https
     password: "${{ secrets.GITHUB_TOKEN }}"
     registry: docker.pkg.github.com
     compose_file: docker-compose.yml
+```
+
+With a compose file override:
+
+```yml
+- uses: whoan/docker-build-with-cache-action@v5
+  with:
+    username: whoan
+    password: "${{ secrets.DOCKER_HUB_PASSWORD }}"
+    compose_file: docker-compose.yml > docker-compose.override.yml
 ```
 
 ### Example with more options
