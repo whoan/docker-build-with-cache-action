@@ -1,0 +1,8 @@
+<%#
+
+A small helper to read the provided script file.
+
+Use with an @import statement with kojo to get the right script indentation.
+
+-%>
+<%= File.open(script_name).read %>

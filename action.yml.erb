@@ -1,0 +1,74 @@
+name: Build docker images using cache
+description: Use registry to pull/push cache for an image (stages included)
+author: whoan
+
+inputs:
+  image_name:
+    description: Name of the image to build
+    required: true
+  username:
+    description: (Optional) Docker's registry user (needed to push image to repository, or to pull from private repository)
+    required: false
+  password:
+    description: (Optional) Docker's registry password (needed to push image to repository, or to pull from private repository)
+    required: false
+  session:
+    description: (Optional) Docker registry's session (extra auth parameters). For the AWS ECR, means setting AWS_SESSION_TOKEN environment variable).
+    required: false
+  registry:
+    description: "(Optional) Docker registry (default: Docker Hub's registry)"
+    required: false
+  image_tag:
+    description: "(Optional) Tag/s of the image to build (default: latest)"
+    required: false
+    default: latest
+  context:
+    description: "(Optional) Docker context (default: ./)"
+    required: false
+    default: .
+  dockerfile:
+    description: "(Optional) Name of the Dockerfile (default: Dockerfile)"
+    required: false
+    default: Dockerfile
+  push_image_and_stages:
+    description: "(Optional) Test any command before pushing. Use false to avoid pushing to registry (default: true)"
+    required: false
+    default: true
+  push_git_tag:
+    description: "(Optional) In addition to `image_tag` value, you can also push current git tag (default: false)"
+    required: false
+    default: false
+  pull_image_and_stages:
+    description: "(Optional) Set to false to avoid pulling from registry (default: true)"
+    required: false
+    default: true
+  build_extra_args:
+    description: "(Optional) Extra arguments to pass to docker build"
+    required: false
+
+outputs:
+  FULL_IMAGE_NAME:
+    description: Full name of the Docker Image with the Registry (if provided) and Namespace included
+    value: ${{ steps.build.outputs.has-changes }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Build docker images using cache
+      id: build
+      env:
+        INPUT_IMAGE_NAME: ${{ inputs.image_name }}
+        INPUT_USERNAME: ${{ inputs.username }}
+        INPUT_PASSWORD: ${{ inputs.password }}
+        INPUT_SESSION: ${{ inputs.session }}
+        INPUT_REGISTRY: ${{ inputs.registry }}
+        INPUT_IMAGE_TAG: ${{ inputs.image_tag }}
+        INPUT_CONTEXT: ${{ inputs.context }}
+        INPUT_DOCKERFILE: ${{ inputs.dockerfile }}
+        INPUT_PUSH_IMAGE_AND_STAGES: ${{ inputs.push_image_and_stages }}
+        INPUT_PUSH_GIT_TAG: ${{ inputs.push_git_tag }}
+        INPUT_PULL_IMAGE_AND_STAGES: ${{ inputs.pull_image_and_stages }}
+        INPUT_BUILD_EXTRA_ARGS: ${{ inputs.build_extra_args }}
+      shell: bash
+      run: |
+        @import script-import-helper (script_name: "docker-build-with-cache.bash")
