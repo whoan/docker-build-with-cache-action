@@ -24,13 +24,32 @@ jobs:
     # `severity`.
     - uses: bewuethr/shellcheck-action@v2
 
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-ruby@v1
+        with:
+          ruby-version: "2.7"
+      - name: Install kojo
+        run: gem install kojo
+      - run: make
+      - name: Check for changes
+        run: |
+          git status
+          git_changes="$(git status --porcelain || true)"
+          # If the output is not empty, there are changes; fail the action
+          if [ -n "$git_changes" ]; then
+              echo "Changes found; build the action with 'make' and commit the changes"
+              exit 1
+          fi
+
   docker:
     name: Docker
     runs-on: ubuntu-latest
-
+    needs: build
     steps:
     - uses: actions/checkout@v2
-
     - uses: ./
       with:
         username: ${{ github.repository_owner }}
@@ -39,3 +58,4 @@ jobs:
         image_name: docker-build-with-cache-action
         push_git_tag: true
         push_image_and_stages: on:push
+
