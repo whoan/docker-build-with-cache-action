@@ -203,6 +203,32 @@ _docker_login() {
   trap logout_from_registry EXIT
 }
 
+_parse_extra_args() {
+  # non-json
+  if ! [[ $INPUT_BUILD_EXTRA_ARGS =~ ^\{ ]]; then
+    return
+  fi
+
+  # json
+  declare -gA extra_args
+  local key
+  local value
+  while read -r key; do
+    value=$(_remove_quotes "$(jq ".$key" <<<"${INPUT_BUILD_EXTRA_ARGS}")")
+    key=$(_remove_quotes "$key")
+    extra_args[$key]="${value//\\n/
+}"
+  done < <(jq "keys[]" <<<"${INPUT_BUILD_EXTRA_ARGS}")
+  INPUT_BUILD_EXTRA_ARGS=""
+}
+
+_remove_quotes() {
+  local param
+  param="${1:?I need a param}"
+  param="${param#\"}"
+  echo "${param%\"}"
+}
+
 # action steps
 init_variables() {
   DUMMY_IMAGE_NAME=my_awesome_image
@@ -272,15 +298,18 @@ build_image() {
     cache_from=$(eval "echo --cache-from=$(_get_full_stages_image_name):{1..$max_stage}")
   fi
 
+  _parse_extra_args
+
   # build image using cache
   set -o pipefail
   set -x
-  # shellcheck disable=SC2086
+  # shellcheck disable=SC2068,SC2086
   docker build \
     $cache_from \
     --tag "$DUMMY_IMAGE_NAME" \
     --file "${INPUT_CONTEXT}"/"${INPUT_DOCKERFILE}" \
     ${INPUT_BUILD_EXTRA_ARGS} \
+    ${extra_args[@]@K} \
     "${INPUT_CONTEXT}" | tee "$BUILD_LOG"
   set +x
 }
