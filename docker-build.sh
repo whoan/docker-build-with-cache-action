@@ -210,14 +210,15 @@ _parse_extra_args() {
   fi
 
   # json
-  declare -gA extra_args
+  declare -ga extra_args
   local key
   local value
   while read -r key; do
     value=$(_remove_quotes "$(jq ".$key" <<<"${INPUT_BUILD_EXTRA_ARGS}")")
     key=$(_remove_quotes "$key")
-    extra_args[$key]="${value//\\n/
-}"
+    extra_args+=("$key")
+    extra_args+=("${value//\\n/
+}")
   done < <(jq "keys[]" <<<"${INPUT_BUILD_EXTRA_ARGS}")
   INPUT_BUILD_EXTRA_ARGS=""
 }
@@ -309,7 +310,7 @@ build_image() {
     --tag "$DUMMY_IMAGE_NAME" \
     --file "${INPUT_CONTEXT}"/"${INPUT_DOCKERFILE}" \
     ${INPUT_BUILD_EXTRA_ARGS} \
-    ${extra_args[@]@K} \
+    "${extra_args[@]}" \
     "${INPUT_CONTEXT}" | tee "$BUILD_LOG"
   set +x
 }
