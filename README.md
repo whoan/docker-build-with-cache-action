@@ -29,7 +29,7 @@ or
 - **image_tag**: Tag(s) of the image. Allows multiple comma-separated tags (e.g. `one,another`) (default: `latest`).  
   If you set **compose_file** and the image(s) already has/have a tag, this is ignored.
 
-- **registry**: Docker registry (default: *Docker Hub's registry*).
+- **registry**: Docker registry (default: *Docker Hub's registry*). You need a registry to use the cache functionality.
 
 - **username**: Docker registry's user (needed to push images, or to pull from a private repository).
 
