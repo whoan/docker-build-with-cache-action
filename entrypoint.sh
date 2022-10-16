@@ -104,7 +104,7 @@ _set_variables() {
 
   INPUT_IMAGE_NAME=${image_name%:*}
   if [ "$INPUT_REGISTRY" ]; then
-    INPUT_IMAGE_NAME=${INPUT_IMAGE_NAME#$INPUT_REGISTRY/}
+    INPUT_IMAGE_NAME=${INPUT_IMAGE_NAME#"$INPUT_REGISTRY"/}
   fi
 
   INPUT_CONTEXT=$(_get_context_by_service_name "$service_name")
