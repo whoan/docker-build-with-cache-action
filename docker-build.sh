@@ -164,7 +164,7 @@ _aws() {
   docker run --rm \
     --env AWS_ACCESS_KEY_ID="$INPUT_USERNAME" \
     --env AWS_SECRET_ACCESS_KEY="$INPUT_PASSWORD" \
-    --env AWS_SESSION_TOKEN="$INPUT_SESSION" \
+    --env AWS_SESSION_TOKEN="${INPUT_SESSION:-$AWS_SESSION_TOKEN}" \
     amazon/aws-cli:2.1.14 --region "$(_get_aws_region)" "$@"
 }
 
