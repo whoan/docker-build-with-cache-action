@@ -210,24 +210,17 @@ _parse_extra_args() {
   fi
 
   # json
-  declare -ga extra_args
+  declare -ga extra_args=()
   local key
   local value
   while read -r key; do
-    value=$(_remove_quotes "$(jq ".$key" <<<"${INPUT_BUILD_EXTRA_ARGS}")")
-    key=$(_remove_quotes "$key")
-    extra_args+=("$key")
-    extra_args+=("${value//\\n/
+    for value in $(jq --raw-output "[.\"$key\"] | flatten[]" <<<"${INPUT_BUILD_EXTRA_ARGS}"); do
+      extra_args+=("$key")
+      extra_args+=("${value//\\n/
 }")
-  done < <(jq "keys[]" <<<"${INPUT_BUILD_EXTRA_ARGS}")
+    done
+  done < <(jq --raw-output "keys[]" <<<"${INPUT_BUILD_EXTRA_ARGS}")
   INPUT_BUILD_EXTRA_ARGS=""
-}
-
-_remove_quotes() {
-  local param
-  param="${1:?I need a param}"
-  param="${param#\"}"
-  echo "${param%\"}"
 }
 
 # action steps

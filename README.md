@@ -47,6 +47,9 @@ or
   > :star2: New in v5.11.0: If you need extra args with newlines or spaces, use json format like this:  
     `build_extra_args: '{"--build-arg": "myarg=Hello\nWorld"}'`
 
+  > :star2: If you need multiple args with same key, use an array as the value of the key like this:  
+    `build_extra_args: '{"--build-arg": ["foo=bar", "one=two"]}'`
+
 - **push_image_and_stages**: Test a command before pushing. Use `false` to not push at all (default: `true`).
 
     This input also supports 2 special values, which are useful if your workflow can be triggered by different events:
