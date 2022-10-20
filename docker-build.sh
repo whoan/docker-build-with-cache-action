@@ -223,13 +223,6 @@ _parse_extra_args() {
   INPUT_BUILD_EXTRA_ARGS=""
 }
 
-_remove_quotes() {
-  local param
-  param="${1:?I need a param}"
-  param="${param#\"}"
-  echo "${param%\"}"
-}
-
 # action steps
 init_variables() {
   DUMMY_IMAGE_NAME=my_awesome_image
