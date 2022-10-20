@@ -111,7 +111,7 @@ _set_variables() {
   INPUT_CONTEXT=${INPUT_CONTEXT:-.}
 
   INPUT_DOCKERFILE=$(_get_dockerfile_by_service_name "$service_name")
-  INPUT_DOCKERFILE=${INPUT_DOCKERFILE:-"$INPUT_CONTEXT"/Dockerfile}
+  INPUT_DOCKERFILE=${INPUT_DOCKERFILE:-Dockerfile}
 }
 
 _get_service_name_by_image_name() {
@@ -131,7 +131,7 @@ _get_context_by_service_name() {
 _get_dockerfile_by_service_name() {
   local service_name
   service_name="${1:?I need a service name}"
-  grep -Po "(?<=services@${service_name}@build@dockerfile=\")[^\"]+" "$parsed_yaml" || echo Dockerfile
+  grep -Po "(?<=services@${service_name}@build@dockerfile=\")[^\"]+" "$parsed_yaml" || true
 }
 
 build_from_compose_file
