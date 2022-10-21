@@ -2,13 +2,17 @@
 
 set -e
 
+_build_image() {
+  /docker-build.sh
+}
+
 # no compose file: original behavior
 if [ -z "$INPUT_COMPOSE_FILE" ]; then
-  /docker-build.sh
+  _build_image
   exit
 fi
 
-parsed_yaml=/tmp/parsed-yaml.txt
+merged_compose=/tmp/merged-compose.yml
 original_INPUT_IMAGE_TAG=$INPUT_IMAGE_TAG
 
 build_from_compose_file() {
@@ -24,68 +28,43 @@ build_from_compose_file() {
   for image in "${images[@]}"; do
     echo -e "\n[Compose file] Building image: $image"
     _set_variables "$image"
-    export INPUT_IMAGE_NAME
-    export INPUT_IMAGE_TAG
-    export INPUT_CONTEXT
-    export INPUT_DOCKERFILE
-    /docker-build.sh
-    echo -e "\n[Compose file] $image - DONE\n"
+    _build_image
+    echo -e "[Compose file] $image - DONE\n"
   done
 }
 
-# shellcheck disable=SC2086
-_merge_yamls() {
+_yq() {
+  local yq
+  yq=$(which yq || true)
+  if [ -z "$yq" ]; then
+    local hash
+    yq=/usr/bin/yq
+    docker pull mikefarah/yq:4.28.2 >&2
+    hash=$(docker create mikefarah/yq:4.28.2)
+    docker cp "$hash":/usr/bin/yq "$yq"
+  fi
+  "$yq" "$@"
+}
+
+_merge_yamls() (
   local yamls=()
   mapfile -d ">" -t yamls < <(echo -n "$INPUT_COMPOSE_FILE")
-
-  touch "$parsed_yaml"
-  local yaml
-  for yaml in "${yamls[@]}"; do
-    while read -r line; do
-      if [[ $line =~ ^(services[^=]+)= ]]; then
-        local fragment=${BASH_REMATCH[1]}
-        if grep -q "$fragment" "$parsed_yaml"; then
-          echo "Overriding: ${fragment//@/ > }"
-          sed -i "/$fragment/d" "$parsed_yaml"
-        fi
-        echo "$line" >> "$parsed_yaml"
-      fi
-    done < <(_parse_yaml $yaml)
-  done
-}
-
-# based on https://stackoverflow.com/a/21189044
-_parse_yaml() {
-   local prefix=$2
-   local s
-   s='[[:space:]]*'
-   local w
-   w='[a-zA-Z0-9_-]*'
-   local fs
-   fs=$(echo @|tr @ '\034')
-
-   sed -ne "s|^\($s\):|\1|" \
-        -e "s|^\($s\)\($w\)$s:${s}[\"']\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
-        -e "s|^\($s\)\($w\)$s:${s}\(.*\)$s\$|\1$fs\2$fs\3|p" "$1" |
-     awk -F"$fs" '{
-        indent = length($1)/2;
-        vname[indent] = $2;
-        for (i in vname) {if (i > indent) {delete vname[i]}}
-        if (length($3) > 0) {
-           vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("@")}
-           printf("%s%s%s=\"%s\"\n", "'"$prefix"'",vn, $2, $3);
-        }
-     }'
-}
+  shopt -s extglob
+  yamls=( "${yamls[@]##*( )}") # trim leading spaces
+  yamls=( "${yamls[@]%%*( )}") # trim trailing spaces
+  # shellcheck disable=SC2016
+  _yq ea '. as $item ireduce ({}; . * $item )' "${yamls[@]}" > "$merged_compose"
+  echo -e "\nCompose file:"
+  cat "$merged_compose"
+  echo
+)
 
 _gather_images() {
+  local registry=$INPUT_REGISTRY
+  : "${registry:=$INPUT_USERNAME}" # an empty registry defaults to DockerHub, and a username is needed to detect its images
+  : "${registry:?Either registry or username (for DockerHub) is needed to build from a compose file}"
   images=()
-  if [ -z "$INPUT_REGISTRY" ]; then
-    # docker hub registry
-    mapfile -t images < <(grep -Po "(?<=@image=\")${INPUT_USERNAME}/[^\"]+" "$parsed_yaml")
-  else
-    mapfile -t images < <(grep -Po "(?<=@image=\")${INPUT_REGISTRY}/[^\"]+" "$parsed_yaml")
-  fi
+  mapfile -t images < <(_yq e ".services.[].image | select(test(\"^${registry}/\"))" "$merged_compose")
 }
 
 _set_variables() {
@@ -112,26 +91,46 @@ _set_variables() {
 
   INPUT_DOCKERFILE=$(_get_dockerfile_by_service_name "$service_name")
   INPUT_DOCKERFILE=${INPUT_DOCKERFILE:-Dockerfile}
+
+  echo "Exporting variables:"
+  echo "INPUT_IMAGE_NAME=$INPUT_IMAGE_NAME"
+  echo "INPUT_IMAGE_TAG=$INPUT_IMAGE_TAG"
+  echo "INPUT_CONTEXT=$INPUT_CONTEXT"
+  echo "INPUT_DOCKERFILE=$INPUT_DOCKERFILE"
+
+  export INPUT_IMAGE_NAME
+  export INPUT_IMAGE_TAG
+  export INPUT_CONTEXT
+  export INPUT_DOCKERFILE
 }
 
 _get_service_name_by_image_name() {
   local image_name
   image_name="${1:?I need an image_name}"
-  # regex info: https://github.com/distribution/distribution/blob/main/reference/regexp.go
-  grep -Po "(?<=services@)[^@]+(?=@image=\"${image_name}(?![[:alnum:]-._]))" "$parsed_yaml" ||
-    { echo "Failed to get service name" >&2 && false; }
+  local service_name
+  service_name=$(_yq e ".services.[] | select(.image == \"${image_name}\") | path | .[1]" "$merged_compose")
+  if [ -z "$service_name" ]; then
+    echo "Failed to get service name" >&2
+    return 1
+  fi
+  echo "$service_name"
 }
 
 _get_context_by_service_name() {
   local service_name
   service_name="${1:?I need a service name}"
-  grep -Po "((?<=services@${service_name}@build@context=\")|(?<=services@${service_name}@build=\"))[^\"]+" "$parsed_yaml" || true
+  local context
+  context=$(_yq e ".services.${service_name}.build.context // \"\"" "$merged_compose" || true)
+  if [ -z "$context" ]; then
+    context=$(_yq e ".services.${service_name}.build // \"\"" "$merged_compose" || true)
+  fi
+  echo "$context"
 }
 
 _get_dockerfile_by_service_name() {
   local service_name
   service_name="${1:?I need a service name}"
-  grep -Po "(?<=services@${service_name}@build@dockerfile=\")[^\"]+" "$parsed_yaml" || true
+  _yq e ".services.${service_name}.build.dockerfile // \"\"" "$merged_compose" || true
 }
 
 build_from_compose_file
