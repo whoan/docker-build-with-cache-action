@@ -225,7 +225,7 @@ _parse_extra_args() {
 
 # action steps
 init_variables() {
-  DUMMY_IMAGE_NAME=my_awesome_image
+  DUMMY_IMAGE_NAME="$INPUT_IMAGE_NAME":tmp_tag_ignore
   BUILD_LOG=build-output.log
   # split tags (to allow multiple comma-separated tags)
   IFS=, read -ra INPUT_IMAGE_TAG <<< "$INPUT_IMAGE_TAG"
