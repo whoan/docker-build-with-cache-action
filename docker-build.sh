@@ -230,11 +230,23 @@ _parse_extra_args() {
 init_variables() {
   DUMMY_IMAGE_NAME="$INPUT_IMAGE_NAME":tmp_tag_ignore
   BUILD_LOG=build-output.log
+
+  if [ -z "$INPUT_USERNAME" ] && _is_aws_ecr; then
+    INPUT_USERNAME=$AWS_ACCESS_KEY_ID
+    INPUT_PASSWORD=$AWS_SECRET_ACCESS_KEY
+  fi
+
   # split tags (to allow multiple comma-separated tags)
   IFS=, read -ra INPUT_IMAGE_TAG <<< "$INPUT_IMAGE_TAG"
   if ! _set_namespace; then
     echo "Could not set namespace" >&2
     exit 1
+  fi
+}
+
+check_aws_cli() {
+  if _is_aws_ecr; then
+    _aws --version
   fi
 }
 
@@ -249,11 +261,6 @@ check_required_input() {
 
 login_to_registry() {
   echo -e "\n[Action Step] Log in to registry..."
-  if [ -z "$INPUT_USERNAME" ] && _is_aws_ecr; then
-    INPUT_USERNAME=$AWS_ACCESS_KEY_ID
-    INPUT_PASSWORD=$AWS_SECRET_ACCESS_KEY
-  fi
-
   if _has_value USERNAME "${INPUT_USERNAME}" && _has_value PASSWORD "${INPUT_PASSWORD}"; then
     _docker_login && return 0
     echo "Could not log in (please check credentials)" >&2
@@ -344,6 +351,7 @@ logout_from_registry() {
 
 
 # run the action
+check_aws_cli
 init_variables
 check_required_input
 login_to_registry
