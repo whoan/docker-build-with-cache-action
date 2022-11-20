@@ -189,6 +189,9 @@ _login_to_aws_ecr() {
 }
 
 _create_aws_ecr_repos() {
+  if ! _must_push; then
+    return 0
+  fi
   if _is_aws_ecr_public; then
     local ecr_public_suffix=-public
   fi
