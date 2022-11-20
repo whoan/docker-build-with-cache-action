@@ -1,3 +1,8 @@
+![](https://github.com/whoan/hello-world/workflows/docker-hub/badge.svg)
+![](https://github.com/whoan/hello-world/workflows/git-hub/badge.svg)
+![](https://github.com/whoan/hello-world/workflows/aws-ecr/badge.svg)
+![](https://github.com/whoan/hello-world/workflows/docker-compose/badge.svg)
+
 # Docker build-with-cache action
 
 This action builds your docker image and caches the stages (supports multi-stage builds) to improve building times in subsequent builds.
