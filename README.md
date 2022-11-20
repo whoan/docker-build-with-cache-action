@@ -143,7 +143,7 @@ Find working minimal examples for the most known registries in [this repo](https
   with:
     username: "${{ secrets.AWS_ACCESS_KEY_ID }}"  # no need to provide it if you already logged in with aws-actions/configure-aws-credentials
     password: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"  # no need to provide it if you already logged in with aws-actions/configure-aws-credentials
-    session:  "${{ secrets.AWS_SESSION_TOKEN }}"  # if you need role assumption
+    session:  "${{ secrets.AWS_SESSION_TOKEN }}"  # if you need role assumption. no need to provide it if you already logged in with aws-actions/configure-aws-credentials
     # private registry
     registry: 861729690598.dkr.ecr.us-west-1.amazonaws.com
     # or public registry
