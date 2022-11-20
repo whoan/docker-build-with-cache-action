@@ -37,13 +37,21 @@ _yq() {
   local yq
   yq=$(which yq || true)
   if [ -z "$yq" ]; then
-    local hash
     yq=/usr/bin/yq
-    docker pull mikefarah/yq:4.28.2 >&2
-    hash=$(docker create mikefarah/yq:4.28.2)
-    docker cp "$hash":/usr/bin/yq "$yq"
+    _copy_yq_from_docker_image "$yq" > /dev/null
   fi
   "$yq" "$@"
+}
+
+_copy_yq_from_docker_image() {
+  local yq_path=$1
+  : "${yq_path:?I need a path where yq will be copied}"
+  local hash
+  yq=/usr/bin/yq
+  docker pull mikefarah/yq:4.28.2 >&2
+  hash=$(docker create mikefarah/yq:4.28.2)
+  docker cp "$hash":/usr/bin/yq "$yq_path"
+  docker rm "$hash"
 }
 
 _merge_yamls() (
