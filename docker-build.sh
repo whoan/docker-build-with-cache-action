@@ -164,7 +164,7 @@ _aws() {
   docker run --rm \
     --env AWS_ACCESS_KEY_ID="$INPUT_USERNAME" \
     --env AWS_SECRET_ACCESS_KEY="$INPUT_PASSWORD" \
-    --env AWS_SESSION_TOKEN="${INPUT_SESSION:-$AWS_SESSION_TOKEN}" \
+    --env AWS_SESSION_TOKEN="$INPUT_SESSION" \
     amazon/aws-cli:2.1.14 --region "$(_get_aws_region)" "$@"
 }
 
@@ -231,9 +231,14 @@ init_variables() {
   DUMMY_IMAGE_NAME="$INPUT_IMAGE_NAME":tmp_tag_ignore
   BUILD_LOG=build-output.log
 
-  if [ -z "$INPUT_USERNAME" ] && _is_aws_ecr; then
-    INPUT_USERNAME=$AWS_ACCESS_KEY_ID
-    INPUT_PASSWORD=$AWS_SECRET_ACCESS_KEY
+  if _is_aws_ecr; then
+    if [ -z "$INPUT_USERNAME" ]; then
+        INPUT_USERNAME=$AWS_ACCESS_KEY_ID
+        INPUT_PASSWORD=$AWS_SECRET_ACCESS_KEY
+    fi
+    if [ -z "$INPUT_SESSION" ]; then
+        INPUT_SESSION=$AWS_SESSION_TOKEN
+    fi
   fi
 
   # split tags (to allow multiple comma-separated tags)
