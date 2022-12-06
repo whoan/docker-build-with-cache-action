@@ -153,7 +153,7 @@ Find working minimal examples for the most known registries in [this repo](https
 
 ### From a compose file
 
-> Images to build are detected `grep`ping the registry (if provided) in the compose file. If no registry is provided, DockerHub is assumed and images with format `<username>/<image>[:<tag>]` are `grep`ped.
+> The compose file is parsed and the action will run once for each detected image. The registry is also detected from the image name, and if none is provided, DockerHub is assumed.
 
 ```yml
 - uses: whoan/docker-build-with-cache-action@v5
