@@ -195,6 +195,7 @@ _create_aws_ecr_repos() {
   if _is_aws_ecr_public; then
     local ecr_public_suffix=-public
   fi
+  echo -e "\n[Action Step - AWS] Creating repositories (if needed)..."
   _aws ecr${ecr_public_suffix} create-repository --repository-name "$INPUT_IMAGE_NAME" 2>&1 | grep -v RepositoryAlreadyExistsException
   _aws ecr${ecr_public_suffix} create-repository --repository-name "$(_get_stages_image_name)" 2>&1 | grep -v RepositoryAlreadyExistsException
   return 0
