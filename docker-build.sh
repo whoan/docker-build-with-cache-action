@@ -12,6 +12,10 @@ _has_value() {
   fi
 }
 
+_is_digitalocean_registry() {
+  [ "$INPUT_REGISTRY" =~ registry.digitalocean.com\/(\S*) ]
+}
+
 _is_docker_hub() {
   [ -z "$INPUT_REGISTRY" ] || [[ "$INPUT_REGISTRY" =~ \.docker\.(com|io)(/|$) ]]
 }
@@ -63,6 +67,8 @@ _set_namespace() {
       [ "$NAMESPACE" ] || return 1
     elif _is_aws_ecr_public; then
       NAMESPACE=$(_aws_get_public_ecr_registry_name)
+    elif _is_digitalocean_registry; then
+      NAMESPACE=${INPUT_REGISTRY##*/}
     fi
     # aws-ecr (private) does not need a namespace
   fi
@@ -205,7 +211,7 @@ _docker_login() {
   if _is_aws_ecr; then
     { _login_to_aws_ecr && _create_aws_ecr_repos; } || return 1
   else
-    echo "${INPUT_PASSWORD}" | docker login -u "${INPUT_USERNAME}" --password-stdin "${INPUT_REGISTRY}" || return 1
+    echo "${INPUT_PASSWORD}" | docker login -u "${INPUT_REGISTRY%% /*}" "${INPUT_USERNAME}" --password-stdin "${INPUT_REGISTRY}" || return 1
   fi
   trap logout_from_registry EXIT
 }
@@ -243,6 +249,11 @@ init_variables() {
     if [ -z "$INPUT_SESSION" ]; then
         INPUT_SESSION=$AWS_SESSION_TOKEN
     fi
+  fi
+  
+  if _is_digitalocean_registry; then
+    INPUT_USERNAME=$DOCTL_TOKEN
+    INPUT_PASSWORD=$DOCTL_TOKEN
   fi
 
   # split tags (to allow multiple comma-separated tags)
