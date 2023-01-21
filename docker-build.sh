@@ -281,6 +281,9 @@ login_to_registry() {
 }
 
 pull_cached_stages() {
+  if [ "$not_logged_in" == true ]; then
+    return
+  fi
   if [ "$INPUT_PULL_IMAGE_AND_STAGES" != true ]; then
     return
   fi
