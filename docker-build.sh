@@ -181,23 +181,27 @@ _aws_get_image_tags() {
 _login_to_aws_ecr() {
   local array="[]"
   if _is_aws_ecr_public; then
-    local ecr_public_suffix=-public
     array=""
   fi
-  _aws ecr${ecr_public_suffix} get-authorization-token --output text --query "authorizationData${array}.authorizationToken" |
+  _aws "$(_aws_ecr)" get-authorization-token --output text --query "authorizationData${array}.authorizationToken" |
     base64 -d | cut -d: -f2 | docker login --username AWS --password-stdin "$INPUT_REGISTRY"
+}
+
+_aws_ecr() {
+  if _is_aws_ecr_public; then
+    echo ecr-public
+  else
+    echo ecr
+  fi
 }
 
 _create_aws_ecr_repos() {
   if ! _must_push; then
     return 0
   fi
-  if _is_aws_ecr_public; then
-    local ecr_public_suffix=-public
-  fi
   echo -e "\n[Action Step - AWS] Creating repositories (if needed)..."
-  _aws ecr${ecr_public_suffix} create-repository --repository-name "$INPUT_IMAGE_NAME" 2>&1 | grep -v RepositoryAlreadyExistsException
-  _aws ecr${ecr_public_suffix} create-repository --repository-name "$(_get_stages_image_name)" 2>&1 | grep -v RepositoryAlreadyExistsException
+  _aws "$(_aws_ecr)" create-repository --repository-name "$INPUT_IMAGE_NAME" 2>&1 | grep -v RepositoryAlreadyExistsException
+  _aws "$(_aws_ecr)" create-repository --repository-name "$(_get_stages_image_name)" 2>&1 | grep -v RepositoryAlreadyExistsException
   return 0
 }
 
