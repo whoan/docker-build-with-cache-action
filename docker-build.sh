@@ -203,7 +203,7 @@ _create_aws_ecr_repos() {
 
 _docker_login() {
   if _is_aws_ecr; then
-    { _login_to_aws_ecr && _create_aws_ecr_repos; } || return 1
+    _login_to_aws_ecr || return 1
   else
     echo "${INPUT_PASSWORD}" | docker login -u "${INPUT_USERNAME}" --password-stdin "${INPUT_REGISTRY}" || return 1
   fi
@@ -278,6 +278,15 @@ login_to_registry() {
   fi
   not_logged_in=true
   echo "INFO: Won't be able to pull from private repos, nor to push to public/private repos" >&2
+}
+
+create_repos() {
+  if [ "$not_logged_in" == true ]; then
+    return
+  fi
+  if _is_aws_ecr; then
+    _create_aws_ecr_repos || return 1
+  fi
 }
 
 pull_cached_stages() {
@@ -367,6 +376,7 @@ check_aws_cli
 init_variables
 check_required_input
 login_to_registry
+create_repos
 pull_cached_stages
 build_image
 tag_image
