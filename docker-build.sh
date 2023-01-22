@@ -219,9 +219,6 @@ _aws_repo_exists() {
 }
 
 _create_aws_ecr_repos() {
-  if ! _must_push; then
-    return 0
-  fi
   echo -e "\n[Action Step - AWS] Creating repositories (if needed)..."
   local main_repo stages_repo
   main_repo=$INPUT_IMAGE_NAME stages_repo=$(_get_stages_image_name)
@@ -311,6 +308,9 @@ login_to_registry() {
 
 create_repos() {
   if [ "$not_logged_in" == true ]; then
+    return
+  fi
+  if ! _must_push; then
     return
   fi
   if _is_aws_ecr; then
