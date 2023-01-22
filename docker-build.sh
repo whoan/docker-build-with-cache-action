@@ -195,14 +195,39 @@ _aws_ecr() {
   fi
 }
 
+_aws_repo_exists() {
+  local repo=$1
+  : "${repo:?}"
+  local subcommand  # use already-needed permissions to avoid new ones
+  if _is_aws_ecr_public; then
+    subcommand=describe-image-tags
+  else
+    subcommand=list-images
+  fi
+
+  local error_log
+  error_log=$(command -p mktemp)
+  _aws "$(_aws_ecr)" "$subcommand" --repository-name "$repo" > /dev/null 2> "$error_log"
+  if [ -s "$error_log" ]; then
+    if ! grep -q RepositoryNotFoundException "$error_log"; then
+      # unknown error. exit
+      cat "$error_log"
+      exit 1
+    fi
+    return 1
+  fi
+}
+
 _create_aws_ecr_repos() {
   if ! _must_push; then
     return 0
   fi
   echo -e "\n[Action Step - AWS] Creating repositories (if needed)..."
-  _aws "$(_aws_ecr)" create-repository --repository-name "$INPUT_IMAGE_NAME" 2>&1 | grep -v RepositoryAlreadyExistsException
-  _aws "$(_aws_ecr)" create-repository --repository-name "$(_get_stages_image_name)" 2>&1 | grep -v RepositoryAlreadyExistsException
-  return 0
+  local main_repo stages_repo
+  main_repo=$INPUT_IMAGE_NAME stages_repo=$(_get_stages_image_name)
+  for repo in "$main_repo" "$stages_repo"; do
+    _aws_repo_exists "$repo" || _aws "$(_aws_ecr)" create-repository --repository-name "$repo"
+  done
 }
 
 _docker_login() {
