@@ -136,7 +136,7 @@ Find working minimal examples for the most known registries in [this repo](https
 
 ### AWS ECR
 
-> You don't even need to create the repositories in advance, as this action takes care of that for you!
+> You don't even need to create the repositories in advance, as this action takes care of that for you! (you'll need the `CreateRepository` permission)
 
 ```yml
 - uses: whoan/docker-build-with-cache-action@v5
