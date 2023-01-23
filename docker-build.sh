@@ -223,7 +223,7 @@ _create_aws_ecr_repos() {
   local main_repo stages_repo
   main_repo=$INPUT_IMAGE_NAME stages_repo=$(_get_stages_image_name)
   for repo in "$main_repo" "$stages_repo"; do
-    _aws_repo_exists "$repo" || _aws "$(_aws_ecr)" create-repository --repository-name "$repo"
+    _aws_repo_exists "$repo" || _aws "$(_aws_ecr)" create-repository --repository-name "$repo" || return 1
   done
 }
 
