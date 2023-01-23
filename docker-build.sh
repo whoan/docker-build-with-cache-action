@@ -181,29 +181,55 @@ _aws_get_image_tags() {
 _login_to_aws_ecr() {
   local array="[]"
   if _is_aws_ecr_public; then
-    local ecr_public_suffix=-public
     array=""
   fi
-  _aws ecr${ecr_public_suffix} get-authorization-token --output text --query "authorizationData${array}.authorizationToken" |
+  _aws "$(_aws_ecr)" get-authorization-token --output text --query "authorizationData${array}.authorizationToken" |
     base64 -d | cut -d: -f2 | docker login --username AWS --password-stdin "$INPUT_REGISTRY"
 }
 
-_create_aws_ecr_repos() {
-  if ! _must_push; then
-    return 0
-  fi
+_aws_ecr() {
   if _is_aws_ecr_public; then
-    local ecr_public_suffix=-public
+    echo ecr-public
+  else
+    echo ecr
   fi
+}
+
+_aws_repo_exists() {
+  local repo=$1
+  : "${repo:?}"
+  local subcommand  # use already-needed permissions to avoid new ones
+  if _is_aws_ecr_public; then
+    subcommand=describe-image-tags
+  else
+    subcommand=list-images
+  fi
+
+  local error_log
+  error_log=$(command -p mktemp)
+  _aws "$(_aws_ecr)" "$subcommand" --repository-name "$repo" > /dev/null 2> "$error_log"
+  if [ -s "$error_log" ]; then
+    if ! grep -q RepositoryNotFoundException "$error_log"; then
+      # unknown error. exit
+      cat "$error_log"
+      exit 1
+    fi
+    return 1
+  fi
+}
+
+_create_aws_ecr_repos() {
   echo -e "\n[Action Step - AWS] Creating repositories (if needed)..."
-  _aws ecr${ecr_public_suffix} create-repository --repository-name "$INPUT_IMAGE_NAME" 2>&1 | grep -v RepositoryAlreadyExistsException
-  _aws ecr${ecr_public_suffix} create-repository --repository-name "$(_get_stages_image_name)" 2>&1 | grep -v RepositoryAlreadyExistsException
-  return 0
+  local main_repo stages_repo
+  main_repo=$INPUT_IMAGE_NAME stages_repo=$(_get_stages_image_name)
+  for repo in "$main_repo" "$stages_repo"; do
+    _aws_repo_exists "$repo" || _aws "$(_aws_ecr)" create-repository --repository-name "$repo" || return 1
+  done
 }
 
 _docker_login() {
   if _is_aws_ecr; then
-    { _login_to_aws_ecr && _create_aws_ecr_repos; } || return 1
+    _login_to_aws_ecr || return 1
   else
     echo "${INPUT_PASSWORD}" | docker login -u "${INPUT_USERNAME}" --password-stdin "${INPUT_REGISTRY}" || return 1
   fi
@@ -278,6 +304,18 @@ login_to_registry() {
   fi
   not_logged_in=true
   echo "INFO: Won't be able to pull from private repos, nor to push to public/private repos" >&2
+}
+
+create_repos() {
+  if [ "$not_logged_in" == true ]; then
+    return
+  fi
+  if ! _must_push; then
+    return
+  fi
+  if _is_aws_ecr; then
+    _create_aws_ecr_repos || return 1
+  fi
 }
 
 pull_cached_stages() {
@@ -367,6 +405,7 @@ check_aws_cli
 init_variables
 check_required_input
 login_to_registry
+create_repos
 pull_cached_stages
 build_image
 tag_image
