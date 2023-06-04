@@ -62,6 +62,8 @@ or
     - `on:push`: Push only if the workflow was triggered by a push.
     - `on:pull_request`: Push only if the workflow was triggered by a pull_request.
 
+- **services_regex**: Regex to filter services from compose file. Only valid when **compose_file** was provided. Default is `.+` (all services).
+
 [branch tip]: https://stackoverflow.com/questions/16080342/what-is-a-branch-tip-in-git
 
 #### Ignored if `compose_file` is set
