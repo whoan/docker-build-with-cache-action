@@ -72,7 +72,7 @@ _gather_images() {
   : "${registry:=$INPUT_USERNAME}" # an empty registry defaults to DockerHub, and a username is needed to detect its images
   : "${registry:?Either registry or username (for DockerHub) is needed to build from a compose file}"
   images=()
-  mapfile -t images < <(_yq e ".services.[].image | select(test(\"^${registry}/\"))" "$merged_compose")
+  mapfile -t images < <(_yq e ".services.[].image | select(. != null and test(\"^${registry}/\"))" "$merged_compose")
 }
 
 _set_variables() {
