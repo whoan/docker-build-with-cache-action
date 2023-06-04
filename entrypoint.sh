@@ -141,4 +141,5 @@ _get_dockerfile_by_service_name() {
   _yq e ".services.${service_name}.build.dockerfile // \"\"" "$merged_compose" || true
 }
 
+_yq --version
 build_from_compose_file
