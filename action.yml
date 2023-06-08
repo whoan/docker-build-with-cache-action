@@ -10,6 +10,10 @@ inputs:
   compose_file:
     description: Path to compose file
     required: false
+  services_regex:
+    description: (Optional) Regex to filter services from compose file
+    required: false
+    default: '.+'
   username:
     description: (Optional) Docker's registry user (needed to push image to repository, or to pull from private repository)
     required: false

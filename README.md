@@ -62,6 +62,8 @@ or
     - `on:push`: Push only if the workflow was triggered by a push.
     - `on:pull_request`: Push only if the workflow was triggered by a pull_request.
 
+- **services_regex**: Regex to filter services from compose file. Only valid when **compose_file** was provided. Default is `.+` (all services).
+
 [branch tip]: https://stackoverflow.com/questions/16080342/what-is-a-branch-tip-in-git
 
 #### Ignored if `compose_file` is set
@@ -180,6 +182,18 @@ With a compose file override:
     username: whoan
     password: "${{ secrets.DOCKER_HUB_PASSWORD }}"
     compose_file: docker-compose.yml > docker-compose.override.yml
+```
+
+Filtering services by regex:
+
+```yml
+- uses: whoan/docker-build-with-cache-action@v5
+  with:
+    username: whoan
+    password: "${{ secrets.GITHUB_TOKEN }}"
+    registry: docker.pkg.github.com
+    compose_file: docker-compose.yml
+    services_regex: '(service_1|extra_service.*)' # eg: builds services called exactly "service_1" plus the ones which start with "extra_service" and may have extra chars after
 ```
 
 ### Example with more options
