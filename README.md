@@ -34,6 +34,8 @@ or
 - **image_tag**: Tag(s) of the image. Allows multiple comma-separated tags (e.g. `one,another`) (default: `latest`).  
   If you set **compose_file** and the image(s) already has/have a tag, this is ignored.
 
+- **context**: Docker context (default: `./`). If a **compose_file** is provided, it will be the context prefixed to any additional context read from the compose file. Look at #133 for more details.
+
 - **registry**: Docker registry (default: *Docker Hub's registry*). You need a registry to use the cache functionality.
 
 - **username**: Docker registry's user (needed to push images, or to pull from a private repository).
@@ -69,8 +71,6 @@ or
 #### Ignored if `compose_file` is set
 
 - **image_name**
-
-- **context**: Docker context (default: `./`).
 
 - **dockerfile**: Dockerfile filename path (default: `"$context"/Dockerfile`).
 
