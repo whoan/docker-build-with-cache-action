@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+export DOCKER_BUILDKIT=0
 set -e
 
 _build_image() {
