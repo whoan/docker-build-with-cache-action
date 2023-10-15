@@ -14,6 +14,7 @@ fi
 
 merged_compose=/tmp/merged-compose.yml
 original_INPUT_IMAGE_TAG=$INPUT_IMAGE_TAG
+original_INPUT_CONTEXT=$INPUT_CONTEXT
 
 build_from_compose_file() {
    echo -e "\nBuilding from Compose file(s)"
@@ -95,7 +96,7 @@ _set_variables() {
   fi
 
   INPUT_CONTEXT=$(_get_context_by_service_name "$service_name")
-  INPUT_CONTEXT=${INPUT_CONTEXT:-.}
+  INPUT_CONTEXT=$original_INPUT_CONTEXT/${INPUT_CONTEXT:-.}
 
   INPUT_DOCKERFILE=$(_get_dockerfile_by_service_name "$service_name")
   INPUT_DOCKERFILE=${INPUT_DOCKERFILE:-Dockerfile}
