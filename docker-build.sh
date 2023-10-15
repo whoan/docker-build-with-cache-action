@@ -248,11 +248,11 @@ _parse_extra_args() {
   local key
   local value
   while read -r key; do
-    for value in $(jq --raw-output "[.\"$key\"] | flatten[]" <<<"${INPUT_BUILD_EXTRA_ARGS}"); do
+    while read -r value; do
       extra_args+=("$key")
       extra_args+=("${value//\\n/
 }")
-    done
+    done < <(jq --raw-output "[.\"$key\"] | flatten[]" <<<"${INPUT_BUILD_EXTRA_ARGS}")
   done < <(jq --raw-output "keys[]" <<<"${INPUT_BUILD_EXTRA_ARGS}")
   INPUT_BUILD_EXTRA_ARGS=""
 }
