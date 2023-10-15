@@ -109,16 +109,20 @@ _set_variables() {
   INPUT_DOCKERFILE=$(_get_dockerfile_by_service_name "$service_name")
   INPUT_DOCKERFILE=${INPUT_DOCKERFILE:-Dockerfile}
 
+  INPUT_BUILD_EXTRA_ARGS=$(_get_args_by_service_name "$service_name")
+
   echo "Exporting variables:"
   echo "INPUT_IMAGE_NAME=$INPUT_IMAGE_NAME"
   echo "INPUT_IMAGE_TAG=$INPUT_IMAGE_TAG"
   echo "INPUT_CONTEXT=$INPUT_CONTEXT"
   echo "INPUT_DOCKERFILE=$INPUT_DOCKERFILE"
+  echo "INPUT_BUILD_EXTRA_ARGS=$INPUT_BUILD_EXTRA_ARGS"
 
   export INPUT_IMAGE_NAME
   export INPUT_IMAGE_TAG
   export INPUT_CONTEXT
   export INPUT_DOCKERFILE
+  export INPUT_BUILD_EXTRA_ARGS
 }
 
 _get_service_name_by_image_name() {
@@ -148,6 +152,23 @@ _get_dockerfile_by_service_name() {
   local service_name
   service_name="${1:?I need a service name}"
   _yq e ".services.${service_name}.build.dockerfile // \"\"" "$merged_compose" || true
+}
+
+_get_args_by_service_name() {
+  local service_name
+  service_name="${1:?I need a service name}"
+
+  local args_json
+  while IFS=": " read -r arg val; do
+    [ -z "$arg" ] && continue
+    args_json=$(
+      jq \
+        --arg key "--build-arg" \
+        --arg value "$arg=$val" \
+        '.[$key] += [$value]' <<< "${args_json:-"{}"}"
+    )
+  done < <(_yq e ".services.${service_name}.build.args // \"\"" "$merged_compose")
+  echo "$args_json"
 }
 
 _yq --version
