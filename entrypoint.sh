@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-export DOCKER_BUILDKIT=0
 set -e
 
 # no compose file: original behavior
