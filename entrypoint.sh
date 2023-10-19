@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-export DOCKER_BUILDKIT=0
 set -e
+export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-0}
 
 dummy_image_name=my_awesome_image
 # split tags (to allow multiple comma-separated tags)
