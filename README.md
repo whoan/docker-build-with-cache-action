@@ -11,6 +11,22 @@ Built-in support for the most known registries:
 - GitHub's (old and new registry)
 - Google Cloud's
 
+## :exclamation: New behavior if you force `DOCKER_BUILDKIT=1`
+
+> It only affects multi-stage builds
+
+This action relies on old builder output where we could take the hash of each intermediate layer during build and tag it as an image.
+When new builder is enabled (`DOCKER_BUILDKIT=1`), this action is not able to push the layers of intermediate stages as it can NOT parse the builder output.
+As a workaround, the action now forces `DOCKER_BUILDKIT=0` by default, but if your workflow relies on the new builder, at the temporary price of not using caches for all the stages, you can enable `DOCKER_BUILDKIT` like this in your job step:
+
+    - name: Build with DOCKER_BUILDKIT enabled
+      env:
+        DOCKER_BUILDKIT: 1
+      uses: whoan/docker-build-with-cache-action@issue-139
+      ...
+
+For plans to be able to cache all stages with `DOCKER_BUILDKIT=1`, see #138.
+
 ## Inputs
 
 ### Required
