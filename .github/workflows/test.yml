@@ -35,7 +35,7 @@ jobs:
       with:
         username: ${{ github.repository_owner }}
         password: "${{ secrets.GITHUB_TOKEN }}"
-        registry: docker.pkg.github.com
+        registry: ghcr.io
         image_name: docker-build-with-cache-action
         push_git_tag: true
         push_image_and_stages: on:push
