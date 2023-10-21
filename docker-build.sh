@@ -41,6 +41,10 @@ _is_aws_ecr_public() {
   [[ "$INPUT_REGISTRY" =~ ^public.ecr.aws$ ]]
 }
 
+_buildkit_is_enabled() {
+  [[ "$DOCKER_BUILDKIT" != 0 ]]
+}
+
 _get_aws_region() {
   _is_aws_ecr_public && echo "us-east-1" && return
   # tied to _is_aws_ecr_private implementation
@@ -329,6 +333,10 @@ pull_cached_stages() {
   if [ "$INPUT_PULL_IMAGE_AND_STAGES" != true ]; then
     return
   fi
+  # cache importing/exporting is done in build statement when BuildKit is enabled
+  if _buildkit_is_enabled; then
+    return
+  fi
   echo -e "\n[Action Step] Pulling image..."
 
   if _is_aws_ecr_public; then
@@ -391,10 +399,6 @@ _build_image_buildkit() {
     ${INPUT_BUILD_EXTRA_ARGS} \
     "${extra_args[@]}" \
     "${INPUT_CONTEXT}"
-}
-
-_buildkit_is_enabled() {
-  ! [[ "$DOCKER_BUILDKIT" == 0 ]]
 }
 
 build_image() {
