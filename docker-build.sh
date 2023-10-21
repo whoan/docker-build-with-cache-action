@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-0}
+export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-1}
 
 # helper functions
 _has_value() {
