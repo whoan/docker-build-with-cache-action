@@ -55,7 +55,7 @@ _image_name_contains_namespace() {
 _set_namespace() {
   if ! _image_name_contains_namespace; then
     if _is_docker_hub || _is_new_github_registry; then
-      NAMESPACE=$INPUT_USERNAME
+      NAMESPACE=${INPUT_USERNAME:?A username is needed if no namespace is provided}
     elif _is_old_github_registry; then
       NAMESPACE=$GITHUB_REPOSITORY
     elif _is_gcloud_registry; then
@@ -261,6 +261,9 @@ _parse_extra_args() {
 init_variables() {
   DUMMY_IMAGE_NAME="$INPUT_IMAGE_NAME":tmp_tag_ignore
   BUILD_LOG=build-output.log
+  : "${INPUT_CONTEXT:=.}"
+  : "${INPUT_DOCKERFILE:=Dockerfile}"
+  : "${GITHUB_OUTPUT:=/dev/stdout}"
 
   if _is_aws_ecr; then
     if [ -z "$INPUT_USERNAME" ]; then
