@@ -393,7 +393,7 @@ _build_image_buildkit() {
   docker buildx build \
     --load \
     --cache-from type=registry,ref="$cache_image" \
-    --cache-to mode=max,type=registry,ref="$cache_image" \
+    --cache-to mode=max,image-manifest=true,type=registry,ref="$cache_image" \
     --tag "$DUMMY_IMAGE_NAME" \
     --file "${INPUT_CONTEXT}"/"${INPUT_DOCKERFILE}" \
     ${INPUT_BUILD_EXTRA_ARGS} \
