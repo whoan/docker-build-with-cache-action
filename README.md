@@ -20,12 +20,14 @@ Built-in support for the most known registries:
 
 - Docker updated to 24.0.6
 - BuildKit is enabled for faster/parallel builds
-- Cache also works with BuildKit enabled except for old GitHub Docker Registry (docker.pkg.github.com). Migrate to ghcr.io or disable BuildKit in the step:
+- Cache also works with BuildKit enabled except for **old** GitHub Docker Registry (docker.pkg.github.com). You can either migrate to ghcr.io or disable BuildKit to use the old registry:
 
-      - name: Build with DOCKER_BUILDKIT disabled
+      - name: Build with DOCKER_BUILDKIT disabled for old GitHub Docker Registry
+        uses: whoan/docker-build-with-cache-action@master
         env:
           DOCKER_BUILDKIT: 0
-        uses: whoan/docker-build-with-cache-action@master
+        with:
+          registry: docker.pkg.github.com
         ...
 
 ## Inputs
