@@ -385,6 +385,11 @@ _build_image_buildkit() {
   local cache_image
   cache_image="$(_get_full_stages_image_name)":latest
 
+  local cache_to
+  if _must_push; then
+    cache_to="--cache-to mode=max,image-manifest=true,type=registry,ref=$cache_image"
+  fi
+
   _parse_extra_args
 
   set -x
@@ -393,7 +398,7 @@ _build_image_buildkit() {
   docker buildx build \
     --load \
     --cache-from type=registry,ref="$cache_image" \
-    --cache-to mode=max,image-manifest=true,type=registry,ref="$cache_image" \
+    $cache_to \
     --tag "$DUMMY_IMAGE_NAME" \
     --file "${INPUT_CONTEXT}"/"${INPUT_DOCKERFILE}" \
     ${INPUT_BUILD_EXTRA_ARGS} \
