@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-0}
+export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-1}
 
 # helper functions
 _has_value() {
@@ -39,6 +39,10 @@ _is_aws_ecr_private() {
 
 _is_aws_ecr_public() {
   [[ "$INPUT_REGISTRY" =~ ^public.ecr.aws$ ]]
+}
+
+_buildkit_is_enabled() {
+  [[ "$DOCKER_BUILDKIT" != 0 ]]
 }
 
 _get_aws_region() {
@@ -329,6 +333,10 @@ pull_cached_stages() {
   if [ "$INPUT_PULL_IMAGE_AND_STAGES" != true ]; then
     return
   fi
+  # cache importing/exporting is done in build statement when BuildKit is enabled
+  if _buildkit_is_enabled; then
+    return
+  fi
   echo -e "\n[Action Step] Pulling image..."
 
   if _is_aws_ecr_public; then
@@ -347,7 +355,7 @@ pull_cached_stages() {
   fi
 }
 
-build_image() {
+_build_image_legacy() {
   echo -e "\n[Action Step] Building image..."
   max_stage=$(_get_max_stage_number)
 
@@ -358,10 +366,9 @@ build_image() {
 
   _parse_extra_args
 
-  # build image using cache
   set -o pipefail
   set -x
-  # shellcheck disable=SC2068,SC2086
+  # shellcheck disable=SC2086
   docker build \
     $cache_from \
     --tag "$DUMMY_IMAGE_NAME" \
@@ -370,6 +377,36 @@ build_image() {
     "${extra_args[@]}" \
     "${INPUT_CONTEXT}" | tee "$BUILD_LOG"
   set +x
+}
+
+_build_image_buildkit() {
+  echo -e "\n[Action Step] Building image with BuildKit..."
+
+  local cache_image
+  cache_image="$(_get_full_stages_image_name)":latest
+
+  _parse_extra_args
+
+  set -x
+  docker buildx create --use
+  # shellcheck disable=SC2086
+  docker buildx build \
+    --load \
+    --cache-from type=registry,ref="$cache_image" \
+    --cache-to mode=max,image-manifest=true,type=registry,ref="$cache_image" \
+    --tag "$DUMMY_IMAGE_NAME" \
+    --file "${INPUT_CONTEXT}"/"${INPUT_DOCKERFILE}" \
+    ${INPUT_BUILD_EXTRA_ARGS} \
+    "${extra_args[@]}" \
+    "${INPUT_CONTEXT}"
+}
+
+build_image() {
+  if _buildkit_is_enabled; then
+    _build_image_buildkit
+  else
+    _build_image_legacy
+  fi
 }
 
 tag_image() {
@@ -395,7 +432,9 @@ push_image_and_stages() {
   fi
 
   _push_image_tags
-  _push_image_stages
+  if ! _buildkit_is_enabled; then
+    _push_image_stages
+  fi
 }
 
 logout_from_registry() {
@@ -416,3 +455,5 @@ tag_image
 push_image_and_stages
 
 echo "FULL_IMAGE_NAME=$(_get_full_image_name)" >> "$GITHUB_OUTPUT"
+
+echo "End of script"
