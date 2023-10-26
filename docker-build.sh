@@ -268,6 +268,8 @@ init_variables() {
   : "${INPUT_CONTEXT:=.}"
   : "${INPUT_DOCKERFILE:=Dockerfile}"
   : "${GITHUB_OUTPUT:=/dev/stdout}"
+  # ! ignore any tag in the custom cache image name
+  INPUT_STAGES_IMAGE_NAME=${INPUT_STAGES_IMAGE_NAME%:*}
 
   if _is_aws_ecr; then
     if [ -z "$INPUT_USERNAME" ]; then
