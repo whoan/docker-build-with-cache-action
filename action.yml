@@ -63,7 +63,7 @@ outputs:
 
 runs:
   using: 'docker'
-  image: 'Dockerfile'
+  image: 'docker://ghcr.io/whoan/docker-build-with-cache-action:next'
 
 branding:
   icon: 'anchor'
