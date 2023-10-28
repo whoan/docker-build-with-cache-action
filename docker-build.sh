@@ -396,7 +396,7 @@ _build_image_buildkit() {
   echo -e "\n[Action Step] Building image with BuildKit..."
 
   local cache_image
-  cache_image="$(_get_full_stages_image_name)":cache
+  cache_image="$(_get_full_stages_image_name)":latest
 
   local cache_from
   if _can_pull; then
