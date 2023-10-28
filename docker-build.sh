@@ -178,7 +178,7 @@ _aws_get_public_ecr_registry_name() {
 }
 
 _aws_get_image_tags() {
-  mapfile -t tags < <(_aws ecr-public describe-image-tags --repository-name "$INPUT_IMAGE_NAME"-stages | jq ".imageTagDetails[].imageTag")
+  mapfile -t tags < <(_aws ecr-public describe-image-tags --repository-name "$(_get_stages_image_name)" | jq ".imageTagDetails[].imageTag")
   tags=( "${tags[@]#\"}" )
   tags=( "${tags[@]%\"}" )
 }
