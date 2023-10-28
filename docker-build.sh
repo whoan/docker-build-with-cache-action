@@ -399,7 +399,7 @@ _build_image_buildkit() {
   cache_image="$(_get_full_stages_image_name)":cache
 
   local cache_to
-  if _must_push; then
+  if _can_push; then
     cache_to="--cache-to mode=max,image-manifest=true,type=registry,ref=$cache_image"
   fi
 
