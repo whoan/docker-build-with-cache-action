@@ -113,6 +113,17 @@ _push() {
   docker push "$(_get_full_image_name):$tag"
 }
 
+_is_logged_in() {
+  [ "$not_logged_in" != true ]
+}
+
+_must_pull() {
+  [ "$INPUT_PULL_IMAGE_AND_STAGES" == true ]
+}
+
+_can_pull() {
+  _must_pull && _is_logged_in
+}
 
 _must_push() {
   if [ "$INPUT_PUSH_IMAGE_AND_STAGES" = on:push ]; then
@@ -126,6 +137,10 @@ _must_push() {
   fi
 
   $INPUT_PUSH_IMAGE_AND_STAGES
+}
+
+_can_push() {
+  _must_push && _is_logged_in
 }
 
 _push_git_tag() {
@@ -317,10 +332,7 @@ login_to_registry() {
 }
 
 create_repos() {
-  if [ "$not_logged_in" == true ]; then
-    return
-  fi
-  if ! _must_push; then
+  if ! _can_push; then
     return
   fi
   if _is_aws_ecr; then
@@ -329,10 +341,7 @@ create_repos() {
 }
 
 pull_cached_stages() {
-  if [ "$not_logged_in" == true ]; then
-    return
-  fi
-  if [ "$INPUT_PULL_IMAGE_AND_STAGES" != true ]; then
+  if ! _can_pull; then
     return
   fi
   # cache importing/exporting is done in build statement when BuildKit is enabled
@@ -433,7 +442,7 @@ push_image_and_stages() {
     return
   fi
 
-  if [ "$not_logged_in" ]; then
+  if ! _is_logged_in; then
     echo "ERROR: Can't push when not logged in to registry. Set \"push_image_and_stages: false\" if you don't want to push" >&2
     return 1
   fi
