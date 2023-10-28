@@ -12,6 +12,11 @@ if [ -z "$INPUT_COMPOSE_FILE" ]; then
   exit
 fi
 
+# use image's yq now that it is available
+_yq() {
+  yq "$@"
+}
+
 merged_compose=/tmp/merged-compose.yml
 original_INPUT_IMAGE_TAG=$INPUT_IMAGE_TAG
 original_INPUT_CONTEXT=$INPUT_CONTEXT
@@ -32,27 +37,6 @@ build_from_compose_file() {
     _build_image
     echo -e "[Compose file] $image - DONE\n"
   done
-}
-
-_yq() {
-  local yq
-  yq=$(which yq || true)
-  if [ -z "$yq" ]; then
-    yq=/usr/bin/yq
-    _copy_yq_from_docker_image "$yq" > /dev/null
-  fi
-  "$yq" "$@"
-}
-
-_copy_yq_from_docker_image() {
-  local yq_path=$1
-  : "${yq_path:?I need a path where yq will be copied}"
-  local hash
-  yq=/usr/bin/yq
-  docker pull mikefarah/yq:4.28.2 >&2
-  hash=$(docker create mikefarah/yq:4.28.2)
-  docker cp "$hash":/usr/bin/yq "$yq_path"
-  docker rm "$hash"
 }
 
 _merge_yamls() (
