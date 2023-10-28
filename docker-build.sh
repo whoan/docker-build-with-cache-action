@@ -180,13 +180,12 @@ _push_image_stages() {
   docker push "$stage_image"
 }
 
-_aws() {
-  docker run --rm \
-    --env AWS_ACCESS_KEY_ID="$INPUT_USERNAME" \
-    --env AWS_SECRET_ACCESS_KEY="$INPUT_PASSWORD" \
-    --env AWS_SESSION_TOKEN="$INPUT_SESSION" \
-    amazon/aws-cli:2.1.14 --region "$(_get_aws_region)" "$@"
-}
+_aws() (
+  export AWS_ACCESS_KEY_ID
+  export AWS_SECRET_ACCESS_KEY
+  export AWS_SESSION_TOKEN
+  aws --region "$(_get_aws_region)" "$@"
+)
 
 _aws_get_public_ecr_registry_name() {
   _aws ecr-public describe-registries --output=text --query 'registries[0].aliases[0].name'
@@ -294,6 +293,9 @@ init_variables() {
     if [ -z "$INPUT_SESSION" ]; then
         INPUT_SESSION=$AWS_SESSION_TOKEN
     fi
+    AWS_ACCESS_KEY_ID=$INPUT_USERNAME
+    AWS_SECRET_ACCESS_KEY=$INPUT_PASSWORD
+    AWS_SESSION_TOKEN=$INPUT_SESSION
   fi
 
   # split tags (to allow multiple comma-separated tags)
