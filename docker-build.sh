@@ -398,8 +398,13 @@ _build_image_buildkit() {
   local cache_image
   cache_image="$(_get_full_stages_image_name)":cache
 
+  local cache_from
+  if _can_pull; then
+    cache_from="--cache-from type=registry,ref=$cache_image"
+  fi
+
   local cache_to
-  if _must_push; then
+  if _can_push; then
     cache_to="--cache-to mode=max,image-manifest=true,type=registry,ref=$cache_image"
   fi
 
@@ -410,7 +415,7 @@ _build_image_buildkit() {
   # shellcheck disable=SC2086
   docker buildx build \
     --load \
-    --cache-from type=registry,ref="$cache_image" \
+    $cache_from \
     $cache_to \
     --tag "$DUMMY_IMAGE_NAME" \
     --file "${INPUT_CONTEXT}"/"${INPUT_DOCKERFILE}" \
