@@ -268,6 +268,8 @@ init_variables() {
   : "${INPUT_CONTEXT:=.}"
   : "${INPUT_DOCKERFILE:=Dockerfile}"
   : "${GITHUB_OUTPUT:=/dev/stdout}"
+  # ! ignore any tag in the custom cache image name
+  INPUT_STAGES_IMAGE_NAME=${INPUT_STAGES_IMAGE_NAME%:*}
 
   if _is_aws_ecr; then
     if [ -z "$INPUT_USERNAME" ]; then
@@ -383,7 +385,7 @@ _build_image_buildkit() {
   echo -e "\n[Action Step] Building image with BuildKit..."
 
   local cache_image
-  cache_image="$(_get_full_stages_image_name)":latest
+  cache_image="$(_get_full_stages_image_name)":cache
 
   local cache_to
   if _must_push; then
