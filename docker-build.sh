@@ -411,7 +411,7 @@ _build_image_buildkit() {
   _parse_extra_args
 
   set -x
-  docker buildx create --use
+  docker buildx create --use --name action-builder-instance |& grep -v "existing instance" || true
   # shellcheck disable=SC2086
   docker buildx build \
     --load \
