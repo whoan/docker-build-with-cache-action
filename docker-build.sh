@@ -25,6 +25,13 @@ _is_new_github_registry() {
   [ "$INPUT_REGISTRY" = ghcr.io ]
 }
 
+_is_gcloud_artifact_registry() {
+  # Docker repository: https://cloud.google.com/artifact-registry/docs/docker/names#docker-repo
+  # Domain-scoped project: https://cloud.google.com/artifact-registry/docs/docker/names#domain
+  [[ "$INPUT_REGISTRY" =~ ([a-z0-9-]+)-docker.pkg.dev\/([a-z0-9-]+)\/([a-z0-9-]+) ]] \
+  || [[ "$INPUT_REGISTRY" =~ ([a-z0-9-]+)-docker.pkg.dev\/([a-z0-9-]+)\/([a-z0-9-]+)\/([a-z0-9-]+) ]]
+}
+
 _is_gcloud_container_registry() {
   [[ "$INPUT_REGISTRY" =~ ^(.+\.)?gcr\.io$ ]]
 }
@@ -66,6 +73,8 @@ _set_namespace() {
       # take project_id from Json Key
       NAMESPACE=$(echo "${INPUT_PASSWORD}" | sed -rn 's@.+project_id" *: *"([^"]+).+@\1@p' 2> /dev/null)
       [ "$NAMESPACE" ] || return 1
+    if _is_gcloud_artifact_registry; then
+      NAMESPACE=$INPUT_REGISTRY
     elif _is_aws_ecr_public; then
       NAMESPACE=$(_aws_get_public_ecr_registry_name)
     fi
