@@ -73,8 +73,6 @@ _set_namespace() {
       # take project_id from Json Key
       NAMESPACE=$(echo "${INPUT_PASSWORD}" | sed -rn 's@.+project_id" *: *"([^"]+).+@\1@p' 2> /dev/null)
       [ "$NAMESPACE" ] || return 1
-    if _is_gcloud_artifact_registry; then
-      NAMESPACE=$INPUT_REGISTRY
     elif _is_aws_ecr_public; then
       NAMESPACE=$(_aws_get_public_ecr_registry_name)
     fi
@@ -309,6 +307,11 @@ init_variables() {
 
   # split tags (to allow multiple comma-separated tags)
   IFS=, read -ra INPUT_IMAGE_TAG <<< "$INPUT_IMAGE_TAG"
+
+  if _is_gcloud_artifact_registry; then
+    return
+  fi
+
   if ! _set_namespace; then
     echo "Could not set namespace" >&2
     exit 1
