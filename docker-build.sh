@@ -25,7 +25,7 @@ _is_new_github_registry() {
   [ "$INPUT_REGISTRY" = ghcr.io ]
 }
 
-_is_gcloud_registry() {
+_is_gcloud_container_registry() {
   [[ "$INPUT_REGISTRY" =~ ^(.+\.)?gcr\.io$ ]]
 }
 
@@ -62,7 +62,7 @@ _set_namespace() {
       NAMESPACE=${INPUT_USERNAME:?A username is needed if no namespace is provided}
     elif _is_old_github_registry; then
       NAMESPACE=$GITHUB_REPOSITORY
-    elif _is_gcloud_registry; then
+    elif _is_gcloud_container_registry; then
       # take project_id from Json Key
       NAMESPACE=$(echo "${INPUT_PASSWORD}" | sed -rn 's@.+project_id" *: *"([^"]+).+@\1@p' 2> /dev/null)
       [ "$NAMESPACE" ] || return 1
