@@ -139,6 +139,8 @@ Find working minimal examples for the most known registries in [this repo](https
 
 ### Google Cloud Artifact Registry
 
+> More info [here](https://cloud.google.com/artifact-registry/docs/docker/names) on Google Cloud repository and image names.
+
 ```yml
 # https://github.com/google-github-actions/auth
 - uses: google-github-actions/auth@v2
