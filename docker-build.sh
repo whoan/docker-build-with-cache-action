@@ -96,9 +96,13 @@ _get_stages_image_name() {
   echo "${INPUT_STAGES_IMAGE_NAME:-${INPUT_IMAGE_NAME}-stages}"
 }
 
+_get_stages_image_tag() {
+  echo "${INPUT_STAGES_IMAGE_TAG:-latest}"
+}
+
 _get_full_stages_image_name() {
   echo "$(_get_image_namespace)$(_get_stages_image_name)"
-}
+} 
 
 _tag() {
   local tag
@@ -396,7 +400,7 @@ _build_image_buildkit() {
   echo -e "\n[Action Step] Building image with BuildKit..."
 
   local cache_image
-  cache_image="$(_get_full_stages_image_name)":latest
+  cache_image="$(_get_full_stages_image_name)":"$(_get_stages_image_tag)"
 
   local cache_from
   if _can_pull; then
