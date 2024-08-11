@@ -171,7 +171,7 @@ _push_image_stages() {
   local stage_image
   for stage in $(_get_stages); do
     echo -e "\nPushing stage: $stage_number"
-    stage_image=$(_get_full_stages_image_name):$stage_number
+    stage_image=$(_get_full_stages_image_name):"$(_get_stages_image_tag)"-$stage_number
     docker tag "$stage" "$stage_image"
     docker push "$stage_image"
     stage_number=$(( stage_number+1 ))
@@ -179,7 +179,7 @@ _push_image_stages() {
 
   # push the image itself as a stage (the last one)
   echo -e "\nPushing stage: $stage_number"
-  stage_image=$(_get_full_stages_image_name):$stage_number
+  stage_image=$(_get_full_stages_image_name):"$(_get_stages_image_tag)"-$stage_number
   docker tag "$DUMMY_IMAGE_NAME" "$stage_image"
   docker push "$stage_image"
 }
