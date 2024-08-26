@@ -65,7 +65,7 @@ or
 - **stages_image_name**: Set custom name for stages/cache image (default: `${image_name}-stages`). 
 
 - **stages_image_tag**: Set custom tag for the stages/cache image. (default: latest)"
-    requires: false
+    required: false
 
 - **push_image_and_stages**: Test a command before pushing. Use `false` to not push at all (default: `true`).
 
