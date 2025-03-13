@@ -25,6 +25,8 @@ jobs:
     - uses: bewuethr/shellcheck-action@v2
 
   docker:
+    permissions:
+      packages: write
     name: Docker
     runs-on: ubuntu-latest
 
