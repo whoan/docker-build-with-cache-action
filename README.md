@@ -137,7 +137,31 @@ Find working minimal examples for the most known registries in [this repo](https
     image_name: hello-world
 ```
 
-### Google Cloud Registry
+### Google Cloud Artifact Registry
+
+> More info [here](https://cloud.google.com/artifact-registry/docs/docker/names) on Google Cloud repository and image names.
+
+```yml
+# https://github.com/google-github-actions/auth
+- uses: google-github-actions/auth@v2
+  id: auth
+  with:
+    token_format: access_token
+    workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+    service_account: ${{ secrets.SERVICE_ACCOUNT }}
+
+- uses: whoan/docker-build-with-cache-action@v5
+  with:
+    username: whoan
+    password: ${{ steps.auth.outputs.access_token }}
+    # Docker repository
+    registry: us-west1-docker.pkg.dev/my-project/my-repo
+    # Domain-scoped project 
+    # registry: us-west1-docker.pkg.dev/example.com/my-project/my-repo
+    image_name: hello-world
+```
+
+### Google Cloud Container Registry
 
 > More info [here](https://cloud.google.com/container-registry/docs/advanced-authentication#json-key) on how to get GCloud JSON key.
 
