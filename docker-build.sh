@@ -237,6 +237,10 @@ _aws_repo_exists() {
   fi
 }
 
+_skip_create_repos() {
+  [ "$INPUT_SKIP_CREATE_REPOS" = true ]
+}
+
 _create_aws_ecr_repos() {
   echo -e "\n[Action Step - AWS] Creating repositories (if needed)..."
   local main_repo stages_repo
@@ -334,7 +338,7 @@ login_to_registry() {
 }
 
 create_repos() {
-  if ! _can_push; then
+  if ! _can_push || ! _skip_create_repos; then
     return
   fi
   if _is_aws_ecr; then
@@ -405,7 +409,7 @@ _build_image_buildkit() {
 
   local cache_to
   if _can_push; then
-    cache_to="--cache-to mode=max,image-manifest=true,type=registry,ref=$cache_image"
+    cache_to="--cache-to mode=max,image-manifest=true,type=registry,compression=zstd,ref=$cache_image"
   fi
 
   _parse_extra_args
