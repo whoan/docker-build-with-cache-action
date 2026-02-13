@@ -62,7 +62,10 @@ or
 
 - **pull_image_and_stages**: Set to `false` to avoid pulling from the registry or to build from scratch (default: `true`).
 
-- **stages_image_name**: Set custom name for stages/cache image (default: `${image_name}-stages`). Tags are ignored.
+- **stages_image_name**: Set custom name for stages/cache image (default: `${image_name}-stages`). 
+
+- **stages_image_tag**: Set custom tag for the stages/cache image. (default: latest)"
+    required: false
 
 - **push_image_and_stages**: Test a command before pushing. Use `false` to not push at all (default: `true`).
 

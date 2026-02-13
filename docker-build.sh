@@ -96,9 +96,13 @@ _get_stages_image_name() {
   echo "${INPUT_STAGES_IMAGE_NAME:-${INPUT_IMAGE_NAME}-stages}"
 }
 
+_get_stages_image_tag() {
+  echo "${INPUT_STAGES_IMAGE_TAG:-latest}"
+}
+
 _get_full_stages_image_name() {
   echo "$(_get_image_namespace)$(_get_stages_image_name)"
-}
+} 
 
 _tag() {
   local tag
@@ -167,7 +171,7 @@ _push_image_stages() {
   local stage_image
   for stage in $(_get_stages); do
     echo -e "\nPushing stage: $stage_number"
-    stage_image=$(_get_full_stages_image_name):$stage_number
+    stage_image=$(_get_full_stages_image_name):"$(_get_stages_image_tag)"-$stage_number
     docker tag "$stage" "$stage_image"
     docker push "$stage_image"
     stage_number=$(( stage_number+1 ))
@@ -175,7 +179,7 @@ _push_image_stages() {
 
   # push the image itself as a stage (the last one)
   echo -e "\nPushing stage: $stage_number"
-  stage_image=$(_get_full_stages_image_name):$stage_number
+  stage_image=$(_get_full_stages_image_name):"$(_get_stages_image_tag)"-$stage_number
   docker tag "$DUMMY_IMAGE_NAME" "$stage_image"
   docker push "$stage_image"
 }
@@ -396,7 +400,7 @@ _build_image_buildkit() {
   echo -e "\n[Action Step] Building image with BuildKit..."
 
   local cache_image
-  cache_image="$(_get_full_stages_image_name)":latest
+  cache_image="$(_get_full_stages_image_name)":"$(_get_stages_image_tag)"
 
   local cache_from
   if _can_pull; then
