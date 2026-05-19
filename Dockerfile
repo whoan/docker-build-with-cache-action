@@ -1,4 +1,4 @@
-FROM docker:29.4.3
+FROM docker:29.5.0
 
 LABEL "maintainer"="whoan <juaneabadie@gmail.com>"
 LABEL "repository"="https://github.com/whoan/docker-build-with-cache-action"
