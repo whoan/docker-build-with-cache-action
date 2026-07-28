@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/stale@v10
+      - uses: actions/stale@v11
         with:
           stale-pr-message: >
             'This PR is stale because it has been open 90 days with no activity. Remove stale label or comment or this will be closed in 5 days.'
